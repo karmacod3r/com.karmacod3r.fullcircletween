@@ -63,12 +63,14 @@ namespace Mediapipe.Unity.UI
         _sourceTypeInput.value = defaultValue;
       }
 
+      /*
       _sourceTypeInput.onValueChanged.AddListener(delegate
       {
         ImageSourceProvider.ImageSource = _solution.bootstrap.GetImageSource((ImageSourceType)_sourceTypeInput.value);
         _isChanged = true;
         InitializeContents();
       });
+    */
     }
 
     private void InitializeSource()

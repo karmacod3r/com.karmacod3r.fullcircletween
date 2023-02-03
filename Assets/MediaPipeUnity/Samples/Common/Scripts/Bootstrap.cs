@@ -22,7 +22,7 @@ namespace Mediapipe.Unity
 
     private const string _TAG = nameof(Bootstrap);
 
-    [SerializeField] private ImageSourceType _defaultImageSource;
+    [SerializeField] private ImageSource _defaultImageSource;
     [SerializeField] private InferenceMode _preferableInferenceMode;
     [SerializeField] private AssetLoaderType _assetLoaderType;
     [SerializeField] private bool _enableGlog = true;
@@ -103,33 +103,9 @@ namespace Mediapipe.Unity
       }
 
       Logger.LogInfo(_TAG, "Preparing ImageSource...");
-      ImageSourceProvider.ImageSource = GetImageSource(_defaultImageSource);
+      ImageSourceProvider.ImageSource = _defaultImageSource;
 
       isFinished = true;
-    }
-
-    public ImageSource GetImageSource(ImageSourceType imageSourceType)
-    {
-      switch (imageSourceType)
-      {
-        case ImageSourceType.WebCamera:
-          {
-            return GetComponent<WebCamSource>();
-          }
-        case ImageSourceType.Image:
-          {
-            return GetComponent<StaticImageSource>();
-          }
-        case ImageSourceType.Video:
-          {
-            return GetComponent<VideoSource>();
-          }
-        case ImageSourceType.Unknown:
-        default:
-          {
-            throw new System.ArgumentException($"Unsupported source type: {imageSourceType}");
-          }
-      }
     }
 
     private void DecideInferenceMode()
