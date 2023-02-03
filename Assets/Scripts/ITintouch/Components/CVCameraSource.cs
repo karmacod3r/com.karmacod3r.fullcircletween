@@ -31,6 +31,8 @@ namespace ITintouch.Components
 
         private void Awake()
         {
+            Debug.Log(GetType().Name + ".Awake");
+            
             if (cvCameraCapture == null)
             {
                 throw new ArgumentException("Please provide a reference to a CvCameraCapture");

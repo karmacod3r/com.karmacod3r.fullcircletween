@@ -10,6 +10,8 @@ namespace ITintouch.Components
     /// This class handles video recording and loading based on controller
     /// input.
     /// </summary>
+    ///
+    [DefaultExecutionOrder(-10)]
     public class CVCameraCapture : MonoBehaviour
     {
         [SerializeField, Tooltip("Desired width for the camera capture")]
@@ -42,8 +44,10 @@ namespace ITintouch.Components
         /// </summary>
         void Awake()
         {
-            IsCapturing = false;
+            IsCapturing = true;
 
+            Debug.Log("Requesting camera permission");
+            
             permissionCallbacks.OnPermissionGranted += OnPermissionGranted;
             permissionCallbacks.OnPermissionDenied += OnPermissionDenied;
             permissionCallbacks.OnPermissionDeniedAndDontAskAgain += OnPermissionDenied;
@@ -82,6 +86,8 @@ namespace ITintouch.Components
             if (IsCapturing) return;
 
             IsPrepared = false;
+            
+            Debug.Log("Starting video capture");
             
             MLCamera.OutputFormat outputFormat = MLCamera.OutputFormat.RGBA_8888;
             MLCamera.CaptureConfig captureConfig = new MLCamera.CaptureConfig();
@@ -123,6 +129,8 @@ namespace ITintouch.Components
             {
                 yield return null;
             }
+            
+            Debug.Log("Checking camera availability...");
 
             while (!cameraDeviceAvailable)
             {
@@ -213,11 +221,12 @@ namespace ITintouch.Components
 
         private void OnPermissionDenied(string permission)
         {
-            MLPluginLog.Error($"{permission} denied, example won't function.");
+            Debug.LogError($"{permission} denied, example won't function.");
         }
 
         private void OnPermissionGranted(string permission)
         {
+            Debug.Log("CVCamera permission granted");
             StartCoroutine(EnableMLCamera());
         }
 

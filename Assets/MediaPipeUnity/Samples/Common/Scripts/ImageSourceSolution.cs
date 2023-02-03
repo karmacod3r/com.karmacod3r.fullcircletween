@@ -60,6 +60,7 @@ namespace Mediapipe.Unity
       var graphInitRequest = graphRunner.WaitForInit(runningMode);
       var imageSource = ImageSourceProvider.ImageSource;
 
+      Debug.Log($"ImageSource: {imageSource}");
       yield return imageSource.Play();
 
       if (!imageSource.isPrepared)
@@ -70,6 +71,7 @@ namespace Mediapipe.Unity
 
       // Use RGBA32 as the input format.
       // TODO: When using GpuBuffer, MediaPipe assumes that the input format is BGRA, so the following code must be fixed.
+      Debug.Log($"ImageSource started: {imageSource.textureWidth}x{imageSource.textureHeight}");
       textureFramePool.ResizeTexture(imageSource.textureWidth, imageSource.textureHeight, TextureFormat.RGBA32);
       SetupScreen(imageSource);
 
