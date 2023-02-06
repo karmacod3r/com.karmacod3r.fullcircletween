@@ -31,6 +31,7 @@ namespace ITintouch.Components
         private float currentAspectRatio;
         
         private Texture2D renderTexture;
+        private Matrix4x4 cameraTransform;
 
         public bool IsCapturing { get; private set; }
         public bool IsPrepared { get; private set; }
@@ -38,6 +39,7 @@ namespace ITintouch.Components
         public int CaptureHeight => captureHeight;
         public int CaptureFrameRate => 30;
         public Texture2D RenderTexture => renderTexture;
+        public Matrix4x4 CameraTransform => cameraTransform;
 
         /// <summary>
         /// Using Awake so that Permissions is set before PermissionRequester Start.
@@ -207,16 +209,10 @@ namespace ITintouch.Components
             MLCamera.FlipFrameVertically(ref capturedFrame);
             UpdateRGBTexture(ref renderTexture, capturedFrame.Planes[0]);
 
-            /*
-            if (MLCVCamera.GetFramePose(resultExtras.VCamTimestamp, out Matrix4x4 cameraTransform).IsOk)
+            if (MLCVCamera.GetFramePose(resultExtras.VCamTimestamp, out cameraTransform) != MLResult.Code.Ok)
             {
-                poseText = $"Cam Pose: {cameraTransform.GetPosition()}; {cameraTransform.rotation}";
+                cameraTransform = Matrix4x4.identity;
             }
-            else
-            {
-                poseText = String.Empty;
-            }
-        */
         }
 
         private void OnPermissionDenied(string permission)
