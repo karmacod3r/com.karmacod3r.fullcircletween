@@ -31,7 +31,7 @@ namespace ITintouch.Components
         private float currentAspectRatio;
         
         private Texture2D renderTexture;
-        private Matrix4x4 cameraTransform;
+        private Matrix4x4 cameraTransform = Matrix4x4.TRS(Vector3.zero, Quaternion.identity, new Vector3(1, 1, 1));
 
         public bool IsCapturing { get; private set; }
         public bool IsPrepared { get; private set; }
@@ -209,11 +209,17 @@ namespace ITintouch.Components
             MLCamera.FlipFrameVertically(ref capturedFrame);
             UpdateRGBTexture(ref renderTexture, capturedFrame.Planes[0]);
 
+            Intrinsics = resultExtras.Intrinsics.Value;
+            
+#if !UNITY_EDITOR
             if (MLCVCamera.GetFramePose(resultExtras.VCamTimestamp, out cameraTransform) != MLResult.Code.Ok)
             {
                 cameraTransform = Matrix4x4.identity;
             }
+#endif
         }
+
+        public MLCamera.IntrinsicCalibrationParameters Intrinsics { get; private set; }
 
         private void OnPermissionDenied(string permission)
         {

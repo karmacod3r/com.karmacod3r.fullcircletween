@@ -5,6 +5,7 @@
 // https://opensource.org/licenses/MIT.
 
 using System.Collections;
+using ITintouch.Components;
 using UnityEngine;
 
 namespace Mediapipe.Unity.PoseTracking
@@ -17,6 +18,7 @@ namespace Mediapipe.Unity.PoseTracking
     [SerializeField] private PoseWorldLandmarkListAnnotationController _poseWorldLandmarksAnnotationController;
     [SerializeField] private MaskAnnotationController _segmentationMaskAnnotationController;
     [SerializeField] private NormalizedRectAnnotationController _roiFromLandmarksAnnotationController;
+    [SerializeField] private PoseWorldLandmarksPositioning _poseWorldLandmarksPositioning;
 
     public PoseTrackingGraph.ModelComplexity modelComplexity
     {
@@ -107,6 +109,8 @@ namespace Mediapipe.Unity.PoseTracking
       _poseWorldLandmarksAnnotationController.DrawNow(poseWorldLandmarks);
       _segmentationMaskAnnotationController.DrawNow(segmentationMask);
       _roiFromLandmarksAnnotationController.DrawNow(roiFromLandmarks);
+
+      _poseWorldLandmarksPositioning.SetPoseLandmarks(poseLandmarks);
     }
 
     private void OnPoseDetectionOutput(object stream, OutputEventArgs<Detection> eventArgs)
@@ -117,6 +121,7 @@ namespace Mediapipe.Unity.PoseTracking
     private void OnPoseLandmarksOutput(object stream, OutputEventArgs<NormalizedLandmarkList> eventArgs)
     {
       _poseLandmarksAnnotationController.DrawLater(eventArgs.value);
+      _poseWorldLandmarksPositioning.SetPoseLandmarks(eventArgs.value);
     }
 
     private void OnPoseWorldLandmarksOutput(object stream, OutputEventArgs<LandmarkList> eventArgs)

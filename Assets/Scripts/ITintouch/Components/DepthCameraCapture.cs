@@ -1,3 +1,4 @@
+using System;
 using UnityEngine;
 using UnityEngine.UI;
 using UnityEngine.XR.MagicLeap;
@@ -14,6 +15,10 @@ public class DepthCameraCapture : MonoBehaviour
     private ulong timeout = 0;
 
     public Texture2D ImageTexture { get; private set; }
+    public byte[] ImageBuffer => lastData?.DepthImage == null ? Array.Empty<byte>() : lastData?.DepthImage.Value.Data;
+
+    public int CaptureWidth => ImageTexture?.width ?? 0;
+    public int CaptureHeight => ImageTexture?.height ?? 0;
 
     private MLDepthCamera.Mode mode = MLDepthCamera.Mode.LongRange;
     private MLDepthCamera.CaptureFlags captureFlag = MLDepthCamera.CaptureFlags.DepthImage;
@@ -50,7 +55,7 @@ public class DepthCameraCapture : MonoBehaviour
             lastData = data;
         }
 
-        if (lastData.DepthImage != null)
+        if (lastData?.DepthImage != null)
         {
             CheckAndCreateTexture((int)lastData.DepthImage.Value.Width, (int)lastData.DepthImage.Value.Height);
 
