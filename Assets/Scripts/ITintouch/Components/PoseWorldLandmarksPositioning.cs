@@ -32,11 +32,22 @@ namespace ITintouch.Components
         [SerializeField]
         private float depthOffset = 1f;
 
+        [SerializeField]
+        private bool updateTransform = true;
+
         private Vector3 offset;
+        private NormalizedLandmarkList poseLandmarks;
 
         public void SetPoseLandmarks(NormalizedLandmarkList poseLandmarks)
         {
-            // TODO: this is a quick and dirty approximation that doesn't account for camera intrinsics / distortion 
+            this.poseLandmarks = poseLandmarks;
+        }
+
+        private void LateUpdate()
+        {
+            // TODO: this is a quick and dirty approximation that doesn't account for camera intrinsics / distortion
+            if (poseLandmarks == null || poseLandmarks.Landmark == null) return;
+            if (depthCameraCapture == null || cvCameraCapture == null) return;
 
             var hipCenter = CalculateHipCenter(poseLandmarks.Landmark);
 
@@ -47,21 +58,29 @@ namespace ITintouch.Components
                 depthCameraCapture.CaptureWidth,
                 depthCameraCapture.CaptureHeight
             ) / 255f * depthValueScale + depthOffset;
-            
+
             // calculate offset
-            // var frustumHeight = 2.0f * depth * Mathf.Tan(cvCameraCapture.Intrinsics.FOV * 0.5f * Mathf.Deg2Rad);
-            // var scale = frustumHeight;
-            // offset = new Vector3(hipCenter.x * scale, hipCenter.y * scale, depth);
-            offset = new Vector3(0, 0, depth);
-        }
+            var frustumHeight = 2.0f * depth * Mathf.Tan(cvCameraCapture.Intrinsics.FOV * 0.5f * Mathf.Deg2Rad);
+            var scale = frustumHeight;
+            offset = new Vector3(hipCenter.x * scale, -hipCenter.y * scale, depth);
+            // offset = new Vector3(0, 0, depth);
 
-        private void LateUpdate()
-        {
-            var cameraTransform = cvCameraCapture.CameraTransform;
-            targetTransform.position = cameraTransform.GetPosition();
-            targetTransform.rotation = cameraTransform.rotation;
+            // set transform
+            if (updateTransform)
+            {
+                var cameraTransform = cvCameraCapture.CameraTransform;
+                targetTransform.position = cameraTransform.GetPosition();
+                targetTransform.rotation = cameraTransform.rotation;
 
-            childTransform.localPosition = offset;
+                childTransform.localPosition = offset;
+            }
+            else
+            {
+                targetTransform.position = Vector3.zero;
+                targetTransform.rotation = Quaternion.identity;
+
+                childTransform.localPosition = Vector3.zero;
+            }
         }
 
         private int Wrap(int value, int size)
@@ -72,6 +91,8 @@ namespace ITintouch.Components
 
         private byte GetDepth(byte[] imageBuffer, int x, int y, int bufferWidth, int bufferHeight)
         {
+            if (imageBuffer == null || imageBuffer.Length == 0) return 0;
+
             return imageBuffer[Wrap(x, bufferWidth) + (bufferHeight - 1 - Wrap(y, bufferHeight)) * bufferWidth];
         }
 
@@ -82,9 +103,18 @@ namespace ITintouch.Components
         /// <returns></returns>
         private Vector2 CalculateHipCenter(IList<NormalizedLandmark> landmarks)
         {
+            var leftHip = landmarks[LeftHipIndex];
+            var rightHip = landmarks[RightHipIndex];
+
+            if (leftHip == null || rightHip == null)
+            {
+                Debug.LogError("Hip landmarks are undefined");
+                return Vector2.zero;
+            }
+
             return new Vector2(
-                (landmarks[LeftHipIndex].X + landmarks[RightHipIndex].X) * 0.5f - 0.5f,
-                (landmarks[LeftHipIndex].Y + landmarks[RightHipIndex].Y) * 0.5f - 0.5f
+                (leftHip.X + rightHip.X) * 0.5f - 0.5f,
+                (leftHip.Y + rightHip.Y) * 0.5f - 0.5f
             );
         }
     }
