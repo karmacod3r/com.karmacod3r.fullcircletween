@@ -23,6 +23,7 @@ namespace Mediapipe.Unity
     private const string _TAG = nameof(Bootstrap);
 
     [SerializeField] private ImageSource _defaultImageSource;
+    [SerializeField] private ImageSource _editorImageSource;
     [SerializeField] private InferenceMode _preferableInferenceMode;
     [SerializeField] private AssetLoaderType _assetLoaderType;
     [SerializeField] private bool _enableGlog = true;
@@ -103,7 +104,7 @@ namespace Mediapipe.Unity
       }
 
       Logger.LogInfo(_TAG, "Preparing ImageSource...");
-      ImageSourceProvider.ImageSource = _defaultImageSource;
+      ImageSourceProvider.ImageSource = Application.isEditor ? _editorImageSource : _defaultImageSource;
 
       isFinished = true;
     }

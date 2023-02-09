@@ -1,5 +1,6 @@
 using System;
 using UnityEngine;
+using UnityEngine.Experimental.Rendering;
 using UnityEngine.UI;
 using UnityEngine.XR.MagicLeap;
 
@@ -15,7 +16,6 @@ public class DepthCameraCapture : MonoBehaviour
     private ulong timeout = 0;
 
     public Texture2D ImageTexture { get; private set; }
-    public byte[] ImageBuffer => lastData?.DepthImage == null ? Array.Empty<byte>() : lastData?.DepthImage.Value.Data;
 
     public int CaptureWidth => ImageTexture?.width ?? 0;
     public int CaptureHeight => ImageTexture?.height ?? 0;

@@ -29,7 +29,7 @@ namespace ITintouch.Components
         private readonly MLPermissions.Callbacks permissionCallbacks = new MLPermissions.Callbacks();
 
         private float currentAspectRatio;
-        
+
         private Texture2D renderTexture;
         private Matrix4x4 cameraTransform = Matrix4x4.TRS(Vector3.zero, Quaternion.identity, new Vector3(1, 1, 1));
 
@@ -49,7 +49,7 @@ namespace ITintouch.Components
             IsCapturing = true;
 
             Debug.Log("Requesting camera permission");
-            
+
             permissionCallbacks.OnPermissionGranted += OnPermissionGranted;
             permissionCallbacks.OnPermissionDenied += OnPermissionDenied;
             permissionCallbacks.OnPermissionDeniedAndDontAskAgain += OnPermissionDenied;
@@ -72,6 +72,13 @@ namespace ITintouch.Components
             }
         }
 
+#if UNITY_EDITOR
+        private void Update()
+        {
+            cameraTransform = Matrix4x4.TRS(transform.position, transform.rotation, transform.lossyScale);
+        }
+#endif
+
         /// <summary>
         /// Captures a still image using the device's camera and returns
         /// the data path where it is saved.
@@ -84,13 +91,13 @@ namespace ITintouch.Components
                 IsCapturing = true;
                 return;
             }
-            
+
             if (IsCapturing) return;
 
             IsPrepared = false;
-            
+
             Debug.Log("Starting video capture");
-            
+
             MLCamera.OutputFormat outputFormat = MLCamera.OutputFormat.RGBA_8888;
             MLCamera.CaptureConfig captureConfig = new MLCamera.CaptureConfig();
             captureConfig.CaptureFrameRate = MLCamera.CaptureFrameRate._30FPS;
@@ -131,7 +138,7 @@ namespace ITintouch.Components
             {
                 yield return null;
             }
-            
+
             Debug.Log("Checking camera availability...");
 
             while (!cameraDeviceAvailable)
@@ -210,7 +217,7 @@ namespace ITintouch.Components
             UpdateRGBTexture(ref renderTexture, capturedFrame.Planes[0]);
 
             Intrinsics = resultExtras.Intrinsics.Value;
-            
+
 #if !UNITY_EDITOR
             if (MLCVCamera.GetFramePose(resultExtras.VCamTimestamp, out cameraTransform) != MLResult.Code.Ok)
             {

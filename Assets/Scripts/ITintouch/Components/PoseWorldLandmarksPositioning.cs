@@ -52,12 +52,12 @@ namespace ITintouch.Components
             var hipCenter = CalculateHipCenter(poseLandmarks.Landmark);
 
             var depth = GetDepth(
-                depthCameraCapture.ImageBuffer,
+                depthCameraCapture.ImageTexture,
                 Mathf.RoundToInt(hipCenter.x * cvCameraCapture.CaptureWidth * depthCoordsScale.x),
                 Mathf.RoundToInt(hipCenter.y * cvCameraCapture.CaptureHeight * depthCoordsScale.y),
                 depthCameraCapture.CaptureWidth,
                 depthCameraCapture.CaptureHeight
-            ) / 255f * depthValueScale + depthOffset;
+            ) * depthValueScale + depthOffset;
 
             // calculate offset
             var frustumHeight = 2.0f * depth * Mathf.Tan(cvCameraCapture.Intrinsics.FOV * 0.5f * Mathf.Deg2Rad);
@@ -89,11 +89,11 @@ namespace ITintouch.Components
             return ret < 0 ? size + ret : size;
         }
 
-        private byte GetDepth(byte[] imageBuffer, int x, int y, int bufferWidth, int bufferHeight)
+        private float GetDepth(Texture2D texture, int x, int y, int bufferWidth, int bufferHeight)
         {
-            if (imageBuffer == null || imageBuffer.Length == 0) return 0;
+            if (texture == null) return 0;
 
-            return imageBuffer[Wrap(x, bufferWidth) + (bufferHeight - 1 - Wrap(y, bufferHeight)) * bufferWidth];
+            return texture.GetPixel(Wrap(x, bufferWidth), Wrap(bufferHeight - 1 - y, bufferHeight)).r;
         }
 
         /// <summary>
