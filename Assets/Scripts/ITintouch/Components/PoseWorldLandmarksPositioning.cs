@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using Google.Protobuf.Collections;
 using Mediapipe;
+using Mediapipe.Unity.PoseTracking;
 using UnityEngine;
 
 namespace ITintouch.Components
@@ -11,41 +12,37 @@ namespace ITintouch.Components
         private const int LeftHipIndex = 23;
         private const int RightHipIndex = 24;
 
-        [SerializeField]
-        private CVCameraCapture cvCameraCapture;
-
-        [SerializeField]
-        private DepthCameraCapture depthCameraCapture;
-
-        [SerializeField]
-        private Transform targetTransform;
-
-        [SerializeField]
-        private Transform childTransform;
-
-        [SerializeField]
-        private Vector2 depthCoordsScale = new Vector2(1f, 1f);
-
-        [SerializeField]
-        private float depthValueScale = 4f;
-
-        [SerializeField]
-        private float depthOffset = 1f;
-
-        [SerializeField]
-        private bool updateTransform = true;
-
+        [SerializeField] private PoseTrackingSolution poseTrackingSolution;
+        [SerializeField] private CVCameraCapture cvCameraCapture;
+        [SerializeField]private DepthCameraCapture depthCameraCapture;
+        [SerializeField]private Transform targetTransform;
+        [SerializeField]private Transform childTransform;
+        [SerializeField]private Vector2 depthCoordsScale = new Vector2(1f, 1f);
+        [SerializeField]private float depthValueScale = 4f;
+        [SerializeField]private float depthOffset = 1f;
+        [SerializeField]private bool updateTransform = true;
+        
         private Vector3 offset;
         private NormalizedLandmarkList poseLandmarks;
 
-        public void SetPoseLandmarks(NormalizedLandmarkList poseLandmarks)
+        private void OnEnable()
         {
-            this.poseLandmarks = poseLandmarks;
+            poseTrackingSolution.receivedNormalizedLandmarks += SetPoseLandmarks;
+        }
+
+        private void OnDisable()
+        {
+            poseTrackingSolution.receivedNormalizedLandmarks -= SetPoseLandmarks;
+        }
+
+        private void SetPoseLandmarks(NormalizedLandmarkList value)
+        {
+            poseLandmarks = value;
         }
 
         private void LateUpdate()
         {
-            // TODO: this is a quick and dirty approximation that doesn't account for camera intrinsics / distortion
+            // TODO: this is a quick and dirty approximation that doesn't account for camera distortion
             if (poseLandmarks == null || poseLandmarks.Landmark == null) return;
             if (depthCameraCapture == null || cvCameraCapture == null) return;
 
@@ -63,7 +60,6 @@ namespace ITintouch.Components
             var frustumHeight = 2.0f * depth * Mathf.Tan(cvCameraCapture.Intrinsics.FOV * 0.5f * Mathf.Deg2Rad);
             var scale = frustumHeight;
             offset = new Vector3(hipCenter.x * scale, -hipCenter.y * scale, depth);
-            // offset = new Vector3(0, 0, depth);
 
             // set transform
             if (updateTransform)

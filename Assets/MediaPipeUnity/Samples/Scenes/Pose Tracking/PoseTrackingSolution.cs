@@ -4,6 +4,7 @@
 // license that can be found in the LICENSE file or at
 // https://opensource.org/licenses/MIT.
 
+using System;
 using System.Collections;
 using ITintouch.Components;
 using UnityEngine;
@@ -18,9 +19,8 @@ namespace Mediapipe.Unity.PoseTracking
     [SerializeField] private PoseWorldLandmarkListAnnotationController _poseWorldLandmarksAnnotationController;
     [SerializeField] private MaskAnnotationController _segmentationMaskAnnotationController;
     [SerializeField] private NormalizedRectAnnotationController _roiFromLandmarksAnnotationController;
-    [SerializeField] private PoseWorldLandmarksPositioning _poseWorldLandmarksPositioning;
-    [SerializeField] private DepthLandmarkListController _depthLandmarkListController;
-    [SerializeField] private MeshingLandmarkListController _meshingLandmarkListController;
+
+    public event Action<NormalizedLandmarkList> receivedNormalizedLandmarks;    
 
     public PoseTrackingGraph.ModelComplexity modelComplexity
     {
@@ -112,9 +112,7 @@ namespace Mediapipe.Unity.PoseTracking
       _segmentationMaskAnnotationController.DrawNow(segmentationMask);
       _roiFromLandmarksAnnotationController.DrawNow(roiFromLandmarks);
 
-      _poseWorldLandmarksPositioning.SetPoseLandmarks(poseLandmarks);
-      _depthLandmarkListController.SetPoseLandmarks(poseLandmarks);
-      _meshingLandmarkListController.SetPoseLandmarks(poseLandmarks);
+      receivedNormalizedLandmarks?.Invoke(poseLandmarks);
     }
 
     private void OnPoseDetectionOutput(object stream, OutputEventArgs<Detection> eventArgs)
@@ -126,9 +124,7 @@ namespace Mediapipe.Unity.PoseTracking
     {
       _poseLandmarksAnnotationController.DrawLater(eventArgs.value);
       
-      _poseWorldLandmarksPositioning.SetPoseLandmarks(eventArgs.value);
-      _depthLandmarkListController.SetPoseLandmarks(eventArgs.value);
-      _meshingLandmarkListController.SetPoseLandmarks(eventArgs.value);
+      receivedNormalizedLandmarks?.Invoke(eventArgs.value);
     }
 
     private void OnPoseWorldLandmarksOutput(object stream, OutputEventArgs<LandmarkList> eventArgs)

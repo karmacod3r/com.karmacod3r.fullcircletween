@@ -1,5 +1,6 @@
 using System.Collections.Generic;
 using Mediapipe;
+using Mediapipe.Unity.PoseTracking;
 using UnityEngine;
 
 namespace ITintouch.Components
@@ -8,8 +9,8 @@ namespace ITintouch.Components
     {
         private const float VisibilityThreshold = 0.5f;
 
+        [SerializeField] private PoseTrackingSolution poseTrackingSolution;
         [SerializeField] private CVCameraCapture cvCameraCapture;
-
         [SerializeField] private GameObject landmarkPrefab;
 
         [SerializeField] private float cameraOriginZ = 0f;
@@ -18,10 +19,20 @@ namespace ITintouch.Components
         private Vector3 offset;
         private NormalizedLandmarkList poseLandmarks;
         private List<Renderer> landmarkRenderers = new();
-
-        public void SetPoseLandmarks(NormalizedLandmarkList poseLandmarks)
+        
+        private void OnEnable()
         {
-            this.poseLandmarks = poseLandmarks;
+            poseTrackingSolution.receivedNormalizedLandmarks += SetPoseLandmarks;
+        }
+
+        private void OnDisable()
+        {
+            poseTrackingSolution.receivedNormalizedLandmarks -= SetPoseLandmarks;
+        }
+
+        private void SetPoseLandmarks(NormalizedLandmarkList value)
+        {
+            poseLandmarks = value;
         }
 
         private void LateUpdate()

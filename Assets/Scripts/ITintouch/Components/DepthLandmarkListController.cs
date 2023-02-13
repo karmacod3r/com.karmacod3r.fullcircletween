@@ -1,41 +1,45 @@
+using System;
 using System.Collections.Generic;
 using Mediapipe;
+using Mediapipe.Unity.PoseTracking;
 using UnityEngine;
 
 namespace ITintouch.Components
 {
     public class DepthLandmarkListController : MonoBehaviour
     {
-        private const float VisibilityThreshold = 0.5f;
+        private const float VisibilityThreshold = 0.01f;
 
-        [SerializeField]
-        private CVCameraCapture cvCameraCapture;
-
-        [SerializeField]
-        private DepthCameraCapture depthCameraCapture;
-
-        [SerializeField]
-        private GameObject landmarkPrefab;
-
-        [SerializeField]
-        private Vector2 depthCoordsScale = new Vector2(1f, 1f);
-
-        [SerializeField]
-        private float depthValueScale = 4f;
-
-        [SerializeField]
-        private float depthOffset = 1f;
-
-        [SerializeField]
-        private float offsetScale = 0.5f;
+        [SerializeField] private PoseTrackingSolution poseTrackingSolution;
+        [SerializeField] private CVCameraCapture cvCameraCapture;
+        [SerializeField] private DepthCameraCapture depthCameraCapture;
+        [SerializeField] private GameObject landmarkPrefab;
+        [SerializeField] private Vector2 depthCoordsScale = new Vector2(1f, 1f);
+        [SerializeField] private float depthValueScale = 4f;
+        [SerializeField] private float depthOffset = 1f;
+        [SerializeField] private float offsetScale = 0.5f;
+        [SerializeField] private float depthSmoothing = 1f;
 
         private Vector3 offset;
         private NormalizedLandmarkList poseLandmarks;
         private List<Renderer> landmarkRenderers = new();
 
-        public void SetPoseLandmarks(NormalizedLandmarkList poseLandmarks)
+        private float[] depthBuffer = Array.Empty<float>();
+        private float lastTimer;
+
+        private void OnEnable()
         {
-            this.poseLandmarks = poseLandmarks;
+            poseTrackingSolution.receivedNormalizedLandmarks += SetPoseLandmarks;
+        }
+
+        private void OnDisable()
+        {
+            poseTrackingSolution.receivedNormalizedLandmarks -= SetPoseLandmarks;
+        }
+        
+        private void SetPoseLandmarks(NormalizedLandmarkList value)
+        {
+            poseLandmarks = value;
         }
 
         private void LateUpdate()
@@ -49,7 +53,16 @@ namespace ITintouch.Components
 
         private void RenderLandmarks(IList<NormalizedLandmark> landmarks)
         {
+            Debug.Log("CV Camera FOV: " + cvCameraCapture.Intrinsics.FOV);
+            
+            var dt = Time.time - lastTimer;
+            lastTimer = Time.time;
+            
             AdjustChildCount(landmarks.Count, landmarkPrefab);
+            if (landmarks.Count != depthBuffer.Length)
+            {
+                Array.Resize(ref depthBuffer, landmarks.Count);
+            }
 
             var cameraTransform = cvCameraCapture.CameraTransform;
             transform.position = cameraTransform.GetPosition();
@@ -60,16 +73,16 @@ namespace ITintouch.Components
                 var landmark = landmarks[i];
                 var child = landmarkRenderers[i];
 
-                Render(child, landmark);
+                depthBuffer[i] = Render(child, landmark, depthBuffer[i], dt);
             }
         }
 
-        private void Render(Renderer child, NormalizedLandmark landmark)
+        private float Render(Renderer child, NormalizedLandmark landmark, float depth, float dt)
         {
             if (landmark.Visibility < VisibilityThreshold)
             {
                 child.enabled = false;
-                return;
+                return depth;
             }
 
             child.enabled = true;
@@ -77,7 +90,7 @@ namespace ITintouch.Components
             var x = landmark.X - 0.5f;
             var y = (landmark.Y - 0.5f) * cvCameraCapture.CaptureHeight / cvCameraCapture.CaptureWidth;
 
-            var depth = GetDepth(
+            var currentDepth = GetDepth(
                 depthCameraCapture.ImageTexture,
                 Mathf.RoundToInt(x * depthCameraCapture.CaptureWidth * depthCoordsScale.x) +
                 depthCameraCapture.CaptureWidth / 2,
@@ -85,14 +98,19 @@ namespace ITintouch.Components
                 depthCameraCapture.CaptureHeight / 2
             ) * depthValueScale + depthOffset;
 
+            var s = Mathf.Abs(dt * 1000f * depthSmoothing) + 1f;
+            var newDepth = Mathf.Lerp(depth, currentDepth, Mathf.Clamp01(1f / s));
+
             // calculate offset
             var fov = Application.isEditor ? 60 : cvCameraCapture.Intrinsics.FOV;
-            var frustumHeight = 2.0f * depth * Mathf.Tan(fov * 0.5f * Mathf.Deg2Rad);
+            var frustumHeight = 2.0f * newDepth * Mathf.Tan(fov * 0.5f * Mathf.Deg2Rad);
             var scale = frustumHeight * offsetScale;
-            offset = new Vector3(x * scale, -y * scale, depth);
+            offset = new Vector3(x * scale, -y * scale, newDepth);
 
             // set transform
             child.transform.localPosition = offset;
+
+            return newDepth;
         }
 
         private void AdjustChildCount(int count, GameObject prefab)
