@@ -6,6 +6,8 @@ using UnityEngine.XR.MagicLeap;
 
 public class DepthCameraCapture : MonoBehaviour
 {
+    public const float MaxDepth = 7.5f;
+    
     private readonly MLPermissions.Callbacks permissionCallbacks = new();
 
     private bool permissionGranted;
@@ -16,9 +18,12 @@ public class DepthCameraCapture : MonoBehaviour
     private ulong timeout = 0;
 
     public Texture2D ImageTexture { get; private set; }
-
+    public byte[] ImageBuffer => (lastData?.DepthImage == null) ? Array.Empty<byte>() : lastData?.DepthImage.Value.Data;
+    
     public int CaptureWidth => ImageTexture?.width ?? 0;
     public int CaptureHeight => ImageTexture?.height ?? 0;
+
+    public float fov => lastData?.Intrinsics.FoV ?? 60;
 
     private MLDepthCamera.Mode mode = MLDepthCamera.Mode.LongRange;
     private MLDepthCamera.CaptureFlags captureFlag = MLDepthCamera.CaptureFlags.DepthImage;
@@ -126,5 +131,28 @@ public class DepthCameraCapture : MonoBehaviour
             ImageTexture = new Texture2D(width, height, TextureFormat.RFloat, false);
             ImageTexture.filterMode = FilterMode.Bilinear;
         }
+    }
+    
+    private int Wrap(int value, int size)
+    {
+        var ret = value % size;
+        return ret < 0 ? size + ret : size;
+    }
+
+    private readonly byte[] floatBuffer = new byte[4];
+
+    public float GetDepth(int x, int y)
+    {
+        var buffer = ImageBuffer;
+        if (buffer == null || buffer.Length == 0) return 0;
+
+        var i = Wrap(x, CaptureWidth) + Wrap(CaptureHeight - 1 - y, CaptureHeight) * CaptureWidth;
+
+        floatBuffer[0] = buffer[i + 0];
+        floatBuffer[1] = buffer[i + 1];
+        floatBuffer[2] = buffer[i + 2];
+        floatBuffer[3] = buffer[i + 3];
+
+        return BitConverter.ToSingle(floatBuffer);
     }
 }

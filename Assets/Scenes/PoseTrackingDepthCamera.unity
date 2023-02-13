@@ -1414,11 +1414,7 @@ PrefabInstance:
         type: 3}
       insertIndex: -1
       addedObject: {fileID: 1631230337}
-    m_AddedComponents:
-    - targetCorrespondingSourceObject: {fileID: 8571076842583978906, guid: 140d1d2c406167c50819d89f86d9092e,
-        type: 3}
-      insertIndex: -1
-      addedObject: {fileID: 1719493043}
+    m_AddedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: 140d1d2c406167c50819d89f86d9092e, type: 3}
 --- !u!224 &705621528 stripped
 RectTransform:
@@ -1827,9 +1823,9 @@ MonoBehaviour:
   landmarkPrefab: {fileID: 7584250447238205817, guid: 97ac08499c0664b1f9c10273186492e8,
     type: 3}
   depthCoordsScale: {x: 1, y: 1}
-  depthValueScale: 4
-  depthOffset: 1
-  offsetScale: 1
+  depthValueScale: 1
+  depthOffset: -0.03
+  offsetScale: 0.64
   depthSmoothing: 1
 --- !u!1001 &1139858760
 PrefabInstance:
@@ -2616,15 +2612,15 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 1344c3c82d62a2a41a3576d8abb8e3ea, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  m_Material: {fileID: 0}
-  m_Color: {r: 1, g: 1, b: 1, a: 0.5019608}
+  m_Material: {fileID: 2100000, guid: 5821ac72f98c74b15905544c1c25a012, type: 2}
+  m_Color: {r: 1, g: 1, b: 1, a: 1}
   m_RaycastTarget: 1
   m_RaycastPadding: {x: 0, y: 0, z: 0, w: 0}
   m_Maskable: 1
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_Texture: {fileID: 0}
+  m_Texture: {fileID: 10300, guid: 0000000000000000f000000000000000, type: 0}
   m_UVRect:
     serializedVersion: 2
     x: 0
@@ -2639,24 +2635,6 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1631230336}
   m_CullTransparentMesh: 1
---- !u!1 &1719493039 stripped
-GameObject:
-  m_CorrespondingSourceObject: {fileID: 8571076842583978906, guid: 140d1d2c406167c50819d89f86d9092e,
-    type: 3}
-  m_PrefabInstance: {fileID: 705621525}
-  m_PrefabAsset: {fileID: 0}
---- !u!225 &1719493043
-CanvasGroup:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1719493039}
-  m_Enabled: 1
-  m_Alpha: 0.5
-  m_Interactable: 1
-  m_BlocksRaycasts: 1
-  m_IgnoreParentGroups: 0
 --- !u!1001 &1737185253
 PrefabInstance:
   m_ObjectHideFlags: 0

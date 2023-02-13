@@ -5,10 +5,10 @@ EditorBuildSettings:
   m_ObjectHideFlags: 0
   serializedVersion: 2
   m_Scenes:
-  - enabled: 1
+  - enabled: 0
     path: Assets/Scenes/PoseTrackingMeshing.unity
     guid: d88856158b2714117ae48f7fed84cdf4
-  - enabled: 0
+  - enabled: 1
     path: Assets/Scenes/PoseTrackingDepthCamera.unity
     guid: dd574303e26984b1ba56db546bf07243
   m_configObjects:
