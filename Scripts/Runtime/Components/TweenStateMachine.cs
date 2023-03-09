@@ -1,9 +1,6 @@
-using System;
 using System.Collections.Generic;
 using System.Linq;
-using FullCircleTween.Attributes;
 using FullCircleTween.Properties;
-using NaughtyAttributes;
 using UnityEngine;
 
 namespace FullCircleTween.Components
@@ -125,12 +122,5 @@ namespace FullCircleTween.Components
         }
 
         private int stateIndex;
-
-        [Button]
-        private void NextState()
-        {
-            stateIndex = (stateIndex + 1) % tweenStates.Count;
-            CurrentState = tweenStates[stateIndex].stateName;
-        }
     }
 }

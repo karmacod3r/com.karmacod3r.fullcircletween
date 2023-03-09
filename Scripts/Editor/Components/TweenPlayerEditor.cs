@@ -1,13 +1,10 @@
-using FullCircleTween.Core.Interfaces;
-using FullCircleTween.Test;
 using UnityEditor;
 using UnityEditor.UIElements;
-using UnityEngine;
 using UnityEngine.UIElements;
 
 namespace FullCircleTween.Components
 {
-    // [CustomEditor(typeof(TweenPlayer))]
+    [CustomEditor(typeof(TweenPlayer))]
     public class TweenPlayerEditor : Editor
     {
         public override VisualElement CreateInspectorGUI()

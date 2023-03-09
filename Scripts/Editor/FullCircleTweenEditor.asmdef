@@ -1,0 +1,16 @@
+{
+    "name": "FullCircleTween.Editor",
+    "rootNamespace": "",
+    "references": [
+        "GUID:a97e12af5020c47abb55e126ba36947a"
+    ],
+    "includePlatforms": [],
+    "excludePlatforms": [],
+    "allowUnsafeCode": false,
+    "overrideReferences": false,
+    "precompiledReferences": [],
+    "autoReferenced": true,
+    "defineConstraints": [],
+    "versionDefines": [],
+    "noEngineReferences": false
+}

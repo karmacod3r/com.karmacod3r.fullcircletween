@@ -1,6 +1,5 @@
 using FullCircleTween.Core;
 using FullCircleTween.Properties;
-using NaughtyAttributes;
 using UnityEngine;
 
 namespace FullCircleTween.Components
@@ -19,7 +18,6 @@ namespace FullCircleTween.Components
             tweenGroup.Remove(clip);
         }
 
-        [Button]
         public void Play()
         {
             tweenGroup.Play(this);
@@ -30,7 +28,6 @@ namespace FullCircleTween.Components
             tweenGroup.Kill();
         }
 
-        [Button]
         public void Pause()
         {
             tweenGroup.Pause();
