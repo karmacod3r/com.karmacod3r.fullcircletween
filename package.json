@@ -1,0 +1,23 @@
+{
+  "name": "com.karmacode.fullcircletween",
+  "version": "0.0.1",
+  "displayName": "Full Circle Tween",
+  "description": "A friendly and extendable tweening solution that makes Unity come full circle - usable in play and edit mode.",
+  "unity": "2019.1",
+  "unityRelease": "0b5",
+  "documentationUrl": "https://karmacoder.com/",
+  "changelogUrl": "https://karmacoder.com/changelog.html",
+  "licensesUrl": "https://karmacoder.com/licensing.html",
+  "dependencies": {
+  },
+  "keywords": [
+    "tweening",
+    "tween",
+    "animation"
+  ],
+  "author": {
+    "name": "karmacoder",
+    "email": "frankschoenhofer@gmail.com",
+    "url": "https://www.karmacoder.com"
+  }
+}
