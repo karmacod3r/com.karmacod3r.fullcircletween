@@ -5,9 +5,9 @@
   "description": "A friendly and extendable tweening solution that makes Unity come full circle - usable in play and edit mode.",
   "unity": "2019.1",
   "unityRelease": "0b5",
-  "documentationUrl": "https://karmacoder.com/",
-  "changelogUrl": "https://karmacoder.com/changelog.html",
-  "licensesUrl": "https://karmacoder.com/licensing.html",
+  "documentationUrl": "https://github.com/karmacod3r/com.karmacod3r.fullcircletween/",
+  "changelogUrl": "https://github.com/karmacod3r/com.karmacod3r.fullcircletween/changelog.html",
+  "licensesUrl": "https://github.com/karmacod3r/com.karmacod3r.fullcircletween/licensing.html",
   "dependencies": {
   },
   "keywords": [
@@ -16,8 +16,8 @@
     "animation"
   ],
   "author": {
-    "name": "karmacoder",
+    "name": "karmacod3r",
     "email": "frankschoenhofer@gmail.com",
-    "url": "https://www.karmacoder.com"
+    "url": "https://github.com/karmacod3r"
   }
 }
