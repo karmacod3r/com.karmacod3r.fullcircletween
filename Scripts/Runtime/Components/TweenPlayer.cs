@@ -8,6 +8,8 @@ namespace FullCircleTween.Components
     {
         [SerializeField] private TweenGroupClip tweenGroup;
 
+        public TweenGroupClip TweenGroup => tweenGroup;
+
         public void Add(TweenClip clip)
         {
             tweenGroup.Add(clip);

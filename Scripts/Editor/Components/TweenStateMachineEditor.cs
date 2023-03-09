@@ -35,6 +35,8 @@ namespace FullCircleTween.Components
             var tweenStates = serializedObject.FindProperty("tweenStates");
             var index = tweenStateMachine.StateNames?.ToList().IndexOf(currentState.stringValue) ?? -1;
             
+            EditorGUILayout.PropertyField(controlledByParent);
+            EditorGUILayout.Space();
             var editIndex = DrawStateList(tweenStates, currentState, index);
             
             var visibleTweenState = editIndex > -1 ? tweenStates.GetArrayElementAtIndex(editIndex) : null;
@@ -42,7 +44,6 @@ namespace FullCircleTween.Components
             var currentStateValue = currentState.stringValue;
             var visibleTweenStateName = GetTweenStateName(visibleTweenState);
             
-            EditorGUILayout.PropertyField(controlledByParent);
             if (visibleTweenState != null)
             {
                 EditorGUI.BeginChangeCheck();
@@ -67,6 +68,8 @@ namespace FullCircleTween.Components
                     serializedObject.ApplyModifiedProperties();
                 }
             }
+
+            serializedObject.ApplyModifiedProperties();
         }
 
         private int DrawStateList(SerializedProperty listProperty, SerializedProperty property, int index)
@@ -118,7 +121,7 @@ namespace FullCircleTween.Components
             buttonRect.x = labelRect.xMax;
             buttonRect.width = buttonWidth;
             var selected = currentState.stringValue == stateName.stringValue;
-            var newSelected = GUI.Toggle(buttonRect, selected, ">", GUI.skin.button);
+            var newSelected = GUI.Toggle(buttonRect, selected, "", EditorStyles.radioButton);
             if (newSelected && !selected)
             {
                 SetCurrentTweenState(stateName.stringValue);

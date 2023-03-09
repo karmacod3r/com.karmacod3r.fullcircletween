@@ -7,9 +7,13 @@ namespace FullCircleTween.Components
 {
     public class TweenStateMachine : MonoBehaviour
     {
-        [SerializeField] private string currentState;
         public bool controlledByParent = true;
-        [SerializeField] private List<TweenState> tweenStates;
+        [SerializeField] private string currentState = "Visible";
+        [SerializeField] private List<TweenState> tweenStates = new()
+        {
+            new() { stateName = "Hidden" },
+            new() { stateName = "Visible" }
+        };
         public string[] StateNames => tweenStates?.Select(groupClip => groupClip.stateName).ToArray();
 
         public string CurrentState

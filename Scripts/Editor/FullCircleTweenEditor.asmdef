@@ -1,6 +1,6 @@
 {
     "name": "FullCircleTween.Editor",
-    "rootNamespace": "",
+    "rootNamespace": "FullCircleTween",
     "references": [
         "GUID:a97e12af5020c47abb55e126ba36947a"
     ],
