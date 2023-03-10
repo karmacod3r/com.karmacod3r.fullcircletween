@@ -267,7 +267,7 @@ namespace FullCircleTween.EditorGui
 
             if (index >= 0 &&
                 Event.current.keyCode == KeyCode.Delete
-                || (Event.current.command && Event.current.shift && Event.current.keyCode == KeyCode.Backspace)
+                || Event.current.keyCode == KeyCode.Backspace
                )
             {
                 Event.current.Use();

@@ -9,7 +9,7 @@ namespace FullCircleTween.Properties
     [CustomPropertyDrawer(typeof(TweenClip))]
     public class TweenClipPropertyDrawer : PropertyDrawer
     {
-        private static readonly string[] controlSizing = {"24", "15%", "15%", "*", "24"};
+        private static readonly string[] controlSizing = {"24", "15%", "25%", "*", "24"};
         private static Rect[] controlRects = new Rect[5];
 
         public override void OnGUI(Rect position, SerializedProperty property, GUIContent label)

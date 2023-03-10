@@ -7,7 +7,7 @@ namespace FullCircleTween.Properties
     [Serializable]
     public class TweenTarget
     {
-        [SerializeReference] private string typeName;
+        [SerializeField] public string typeName;
         
         public TweenTarget() {}
 
