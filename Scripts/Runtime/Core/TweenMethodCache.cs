@@ -5,17 +5,18 @@ using System.Reflection;
 using FullCircleTween.Attributes;
 using FullCircleTween.Core.Interfaces;
 using FullCircleTween.Properties;
+using UnityEngine;
+using Object = System.Object;
 #if UNITY_EDITOR
 using UnityEditor;
 #endif
-using UnityEngine;
 
 namespace FullCircleTween.Core
 {
     public static class TweenMethodCache
     {
         public static List<string> allComponentTypeNames = new List<string>();
-        private static Dictionary<Type, Dictionary<string, MethodInfo>> tweeenMethods = new Dictionary<Type, Dictionary<string, MethodInfo>>();
+        private static Dictionary<Type, Dictionary<string, MethodInfo>> tweenMethods = new Dictionary<Type, Dictionary<string, MethodInfo>>();
         private static Dictionary<Type, List<string>> popupListCache = new Dictionary<Type, List<string>>();
 
         private static readonly Dictionary<Type, Type> unityTypeMap = new Dictionary<Type, Type>
@@ -42,7 +43,7 @@ namespace FullCircleTween.Core
 
         public static void RecacheTweenMethods()
         {
-            tweeenMethods.Clear();
+            tweenMethods.Clear();
             popupListCache.Clear();
 
             var assemblies = AppDomain.CurrentDomain.GetAssemblies().ToList();
@@ -54,11 +55,32 @@ namespace FullCircleTween.Core
                     .ForEach(AddTweenMethods);
             });
 
-            allComponentTypeNames = tweeenMethods.Keys.ToList()
+            FillInBaseTypes();
+
+            allComponentTypeNames = tweenMethods.Keys.ToList()
                 .Where(type => typeof(Component).IsAssignableFrom(type))
                 .Select(type => type.AssemblyQualifiedName)
                 .ToList();
             allComponentTypeNames.Sort();
+        }
+
+        private static void FillInBaseTypes()
+        {
+            foreach (var type in tweenMethods.Keys)
+            {
+                var baseType = type.BaseType;
+                while (baseType != null)
+                {
+                    if (tweenMethods.ContainsKey(baseType))
+                    {
+                        foreach (var entry in tweenMethods[baseType])
+                        {
+                            tweenMethods[type].TryAdd(entry.Key, entry.Value);
+                        }
+                    }
+                    baseType = baseType.BaseType;
+                }
+            }
         }
 
         private static void AddTweenMethods(Type extensionClass)
@@ -70,19 +92,19 @@ namespace FullCircleTween.Core
                 var parameters = info.GetParameters();
                 var targetType = info.IsStatic ? parameters[0].ParameterType : extensionClass;
 
-                if (!tweeenMethods.ContainsKey(targetType))
+                if (!tweenMethods.ContainsKey(targetType))
                 {
-                    tweeenMethods.Add(targetType, new Dictionary<string, MethodInfo>());
+                    tweenMethods.Add(targetType, new Dictionary<string, MethodInfo>());
                 }
 
                 var methodName = GetMethodName(info);
-                if (tweeenMethods[targetType].ContainsKey(methodName))
+                if (tweenMethods[targetType].ContainsKey(methodName))
                 {
                     Debug.LogError($"Tween method already defined - skipping {methodName} ({info}) for type {targetType}");
                     return;
                 }
 
-                tweeenMethods[targetType][methodName] = info;
+                tweenMethods[targetType][methodName] = info;
             });
         }
 
@@ -131,7 +153,7 @@ namespace FullCircleTween.Core
         {
             if (popupListCache.ContainsKey(targetType)) return popupListCache[targetType];
 
-            var ret = tweeenMethods.ContainsKey(targetType) ? tweeenMethods[targetType].Keys.ToList() : new List<string>();
+            var ret = tweenMethods.ContainsKey(targetType) ? tweenMethods[targetType].Keys.ToList() : new List<string>();
             ret.Sort();
             popupListCache[targetType] = ret;
             return ret;
@@ -139,8 +161,8 @@ namespace FullCircleTween.Core
 
         public static MethodInfo GetTweenMethodInfo(Type targetType, string methodName)
         {
-            if (!tweeenMethods.ContainsKey(targetType) || !tweeenMethods[targetType].ContainsKey(methodName)) return null;
-            return tweeenMethods[targetType][methodName];
+            if (!tweenMethods.ContainsKey(targetType) || !tweenMethods[targetType].ContainsKey(methodName)) return null;
+            return tweenMethods[targetType][methodName];
         }
 
         public static ITween CreateTween(object target, string methodName, TweenClipValue toValue, float duration)

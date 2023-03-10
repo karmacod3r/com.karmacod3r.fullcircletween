@@ -9,9 +9,6 @@ namespace FullCircleTween.TweenCollections
     [TweenCollection]
     public static class TransformTweenCollection
     {
-        [Preserve] public static Tween<bool> TweenActive(this Transform target, bool toValue, float duration)
-            => target.To(() => target.gameObject.activeSelf, value => target.gameObject.SetActive(value), toValue, duration);
-        
         [Preserve] public static Tween<Vector3> TweenPosition(this Transform target, Vector3 toValue, float duration)
             => target.To(() => target.position, value => target.position = value, toValue, duration);
 

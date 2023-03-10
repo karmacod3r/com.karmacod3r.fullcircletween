@@ -9,7 +9,7 @@ namespace FullCircleTween.TweenCollections
     [TweenCollection]
     public static class BehaviourTweenCollection
     {
-        [Preserve] public static Tween<bool> TweenActive(this Behaviour target, bool toValue, float duration)
+        [Preserve] public static Tween<bool> TweenEnabled(this Behaviour target, bool toValue, float duration)
             => target.To(() => target.enabled, value => target.enabled = value, toValue, duration);
     }
 }
