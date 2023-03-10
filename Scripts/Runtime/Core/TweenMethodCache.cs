@@ -160,6 +160,7 @@ namespace FullCircleTween.Core
 
         public static List<string> GetPopupMethodNames(Type targetType)
         {
+            if (targetType == null) return new List<string>();
             if (popupListCache.ContainsKey(targetType)) return popupListCache[targetType];
 
             EnsureTypeInitialization(targetType);
@@ -172,6 +173,7 @@ namespace FullCircleTween.Core
 
         public static MethodInfo GetTweenMethodInfo(Type targetType, string methodName)
         {
+            if (targetType == null) return null;
             EnsureTypeInitialization(targetType);
             
             if (tweenMethods[targetType].ContainsKey(methodName))
