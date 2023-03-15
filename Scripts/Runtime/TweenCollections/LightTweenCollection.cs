@@ -10,7 +10,7 @@ namespace FullCircleTween.TweenCollections
     {
         [Preserve] public static Tween<Color> TweenColor(this Light target, Color toValue, float duration)
             => Tween<Color>.To(target, () => target.color, value => target.color = value, toValue, duration);
-        
+
         [Preserve] public static Tween<float> TweenIntensity(this Light target, float toValue, float duration)
             => Tween<float>.To(target, () => target.intensity, value => target.intensity = value, toValue, duration);
     }
