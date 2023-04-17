@@ -1,6 +1,7 @@
 using System;
 using System.Linq;
 using System.Threading.Tasks;
+using FullCircleTween.Components;
 using FullCircleTween.Core.Interfaces;
 using UnityEngine;
 
@@ -210,6 +211,17 @@ namespace FullCircleTween.Core
         {
             // TODO: implement pooling
             return new Tween<T>(lerpMethod, target, getter, setter, toValue, duration, memberName);
+        }
+    }
+
+    public static class Tween
+    {
+        public static ITween DelayedCall(object target, float delay, Action callback)
+        {
+            var time = 0f;
+            return Tween<float>.To(target, () => time, (value) => time = value, delay, delay)
+                .SetEasing(Ease.Linear)
+                .Then(callback);
         }
     }
 }

@@ -19,13 +19,13 @@ namespace FullCircleTween.Core
         private static bool initialized;
         private static List<ITween> tweens;
         private static bool inUpdate;
-        private static List<Action> cachedMethodCalls = new();
+        private static Queue<Action> cachedMethodCalls = new();
 
         internal static void AddTween(ITween tween)
         {
             if (inUpdate)
             {
-                cachedMethodCalls.Add(() => AddTween(tween));
+                cachedMethodCalls.Enqueue(() => AddTween(tween));
                 return;
             }
 
@@ -36,7 +36,7 @@ namespace FullCircleTween.Core
         {
             if (inUpdate)
             {
-                cachedMethodCalls.Add(() => RemoveTween(tween));
+                cachedMethodCalls.Enqueue(() => RemoveTween(tween));
                 return;
             }
 
@@ -106,8 +106,10 @@ namespace FullCircleTween.Core
 
         private static void CallCachedMethods()
         {
-            cachedMethodCalls.ForEach(method => method());
-            cachedMethodCalls.Clear();
+            while (cachedMethodCalls.Count > 0)
+            {
+                cachedMethodCalls.Dequeue()();
+            }
         }
 
         public static void LoadConfig()

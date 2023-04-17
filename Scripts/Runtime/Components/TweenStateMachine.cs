@@ -1,5 +1,7 @@
 using System.Collections.Generic;
 using System.Linq;
+using FullCircleTween.Core;
+using FullCircleTween.Extensions;
 using FullCircleTween.Properties;
 using UnityEngine;
 
@@ -34,33 +36,39 @@ namespace FullCircleTween.Components
 
         private void ApplyState(string stateName)
         {
+            var newState = TryGetState(stateName);
+            if (newState == null) return;
+            
             KillAll();
-            Play(stateName);
-            PropagateStateChangeToChildren(transform);
+            newState.Play(this);
+            PropagateStateChangeToChildren(transform, newState.delay);
         }
 
-        private void PropagateStateChangeToChildren(Transform root)
+        private void PropagateStateChangeToChildren(Transform root, float delay)
         {
             if (root == null) return;
 
-            var tweenPlayers = root.GetComponents<TweenStateMachine>();
-
-            var stateApplied = false;
-            foreach (var tweenPlayer in tweenPlayers)
+            this.DelayedCall(delay, () =>
             {
-                if (tweenPlayer == null || tweenPlayer == this || !tweenPlayer.controlledByParent || !tweenPlayer.HasState(currentState)) continue;
+                var tweenPlayers = root.GetComponents<TweenStateMachine>();
 
-                tweenPlayer.CurrentState = currentState;
-                stateApplied = true;
-            }
-
-            if (!stateApplied)
-            {
-                foreach (Transform t in root)
+                var stateApplied = false;
+                foreach (var tweenPlayer in tweenPlayers)
                 {
-                    PropagateStateChangeToChildren(t);
+                    if (tweenPlayer == null || tweenPlayer == this || !tweenPlayer.controlledByParent || !tweenPlayer.HasState(currentState)) continue;
+
+                    tweenPlayer.CurrentState = currentState;
+                    stateApplied = true;
                 }
-            }
+
+                if (!stateApplied)
+                {
+                    foreach (Transform t in root)
+                    {
+                        PropagateStateChangeToChildren(t, 0);
+                    }
+                }
+            });
         }
 
         private int GetStateIndex(string stateName) => tweenStates.FindIndex(clipGroup => clipGroup.stateName == stateName);
@@ -110,7 +118,7 @@ namespace FullCircleTween.Components
             return tweenStates[index].tweenGroup;
         }
 
-        public void Play(string stateName)
+        private void Play(string stateName)
         {
             TryGetState(stateName)?.Play(this);
         }
@@ -118,6 +126,7 @@ namespace FullCircleTween.Components
         public void KillAll()
         {
             tweenStates.ForEach(state => state.tweenGroup.Kill());
+            this.KillAllTweens();
         }
 
         public void Pause(string stateName)
