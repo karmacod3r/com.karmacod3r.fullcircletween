@@ -2,7 +2,7 @@
   "name": "com.karmacoder.fullcircletween",
   "version": "0.0.1",
   "displayName": "Full Circle Tween",
-  "description": "A friendly and extendable tweening solution that makes Unity come full circle - usable in play and edit mode.",
+  "description": "A friendly and extendable tweening solution for edit and play mode",
   "unity": "2019.1",
   "unityRelease": "0b5",
   "documentationUrl": "https://github.com/karmacod3r/com.karmacod3r.fullcircletween/",

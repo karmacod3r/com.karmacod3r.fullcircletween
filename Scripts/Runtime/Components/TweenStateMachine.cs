@@ -2,6 +2,7 @@ using System.Collections.Generic;
 using System.Linq;
 using FullCircleTween.Attributes;
 using FullCircleTween.Core;
+using FullCircleTween.Core.Interfaces;
 using FullCircleTween.Extensions;
 using FullCircleTween.Properties;
 using UnityEditor;
@@ -44,35 +45,31 @@ namespace FullCircleTween.Components
             if (newState == null) return;
 
             KillAll();
-            newState.Play(this);
-            PropagateStateChangeToChildren(transform, newState.delay);
+            var tweenGroup = newState.Play(this);
+            ApplyChildTweens(transform, tweenGroup);
         }
 
-        private void PropagateStateChangeToChildren(Transform root, float delay)
+        private void ApplyChildTweens(Transform root, TweenGroup tweenGroup)
         {
-            if (root == null) return;
+            var tweenPlayers = root.GetComponents<TweenStateMachine>();
 
-            this.DelayedCall(delay, () =>
+            foreach (var tweenPlayer in tweenPlayers)
             {
-                var tweenPlayers = root.GetComponents<TweenStateMachine>();
+                if (tweenPlayer == null || tweenPlayer == this || !tweenPlayer.controlledByParent || !tweenPlayer.HasState(currentState)) continue;
 
-                var stateApplied = false;
-                foreach (var tweenPlayer in tweenPlayers)
-                {
-                    if (tweenPlayer == null || tweenPlayer == this || !tweenPlayer.controlledByParent || !tweenPlayer.HasState(currentState)) continue;
+                tweenGroup.Insert(tweenPlayer.ApplyStateFromParent(currentState), 0);
+            }
+            
+            foreach (Transform child in root)
+            {
+                ApplyChildTweens(child, tweenGroup);
+            }
+        }
 
-                    tweenPlayer.CurrentState = currentState;
-                    stateApplied = true;
-                }
-
-                if (!stateApplied)
-                {
-                    foreach (Transform t in root)
-                    {
-                        PropagateStateChangeToChildren(t, 0);
-                    }
-                }
-            });
+        private TweenGroup ApplyStateFromParent(string value)
+        {
+            currentState = value;
+            return TryGetState(currentState)?.Play(transform);
         }
 
         private int GetStateIndex(string stateName) => tweenStates.FindIndex(clipGroup => clipGroup.stateName == stateName);

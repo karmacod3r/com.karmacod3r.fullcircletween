@@ -67,7 +67,7 @@ namespace FullCircleTween.Properties
             tweenClips.Remove(clip);
         }
 
-        public ITween Play(Component context)
+        public TweenGroup Play(Component context)
         {
             if (tweenGroup != null)
             {

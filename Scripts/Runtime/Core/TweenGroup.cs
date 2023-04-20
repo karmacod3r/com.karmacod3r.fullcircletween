@@ -15,7 +15,6 @@ namespace FullCircleTween.Core
         private bool completed;
         private float delay;
         private float playHeadSeconds;
-        private float appendOffset;
 
         public bool IsPlaying => playing;
         public bool Completed => completed;
@@ -43,27 +42,40 @@ namespace FullCircleTween.Core
         public TweenGroup(object target, IEnumerable<ITween> tweens = null)
         {
             this.target = target;
-            AddTweens(tweens);            
+            Insert(tweens);            
             Play();
         }
 
         public TweenGroup(IEnumerable<ITween> tweens = null)
         {
             target = this;
-            AddTweens(tweens);
+            Insert(tweens);
             Play();
         }
 
-        public TweenGroup Add(ITween tween)
+        public TweenGroup Insert(ITween tween, float offsetSeconds = 0)
         {
             if (tween == null) return this;
             
             tween.Pause();
             tween.SetTarget(target);
+            tween.SetDelay(tween.Delay + offsetSeconds);
             tweens.Add(tween);
             
             SortTweens();
             
+            return this;
+        }
+
+        public TweenGroup Insert(IEnumerable<ITween> tweens, float offsetSeconds = 0)
+        {
+            if (tweens == null) return this;
+            
+            foreach (var tween in tweens)
+            {
+                Insert(tween, offsetSeconds);
+            }
+
             return this;
         }
 
@@ -81,8 +93,15 @@ namespace FullCircleTween.Core
         {
             if (tween == null) return this;
             
-            tween.SetDelay(Duration);
-            Add(tween);
+            Insert(tween, Duration);
+            return this;
+        }
+
+        public TweenGroup Append(IEnumerable<ITween> tweens)
+        {
+            if (tweens == null) return this;
+            
+            Insert(tweens, Duration);
             return this;
         }
 
@@ -92,13 +111,11 @@ namespace FullCircleTween.Core
             return this;
         }
 
-        public TweenGroup AddTweens(IEnumerable<ITween> tweens)
+        public TweenGroup Remove(IEnumerable<ITween> tweens)
         {
-            if (tweens == null) return this;
-            
             foreach (var tween in tweens)
             {
-                Add(tween);
+                Remove(tween);
             }
 
             return this;
