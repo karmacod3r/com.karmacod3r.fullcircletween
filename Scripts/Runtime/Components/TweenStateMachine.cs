@@ -1,8 +1,10 @@
 using System.Collections.Generic;
 using System.Linq;
+using FullCircleTween.Attributes;
 using FullCircleTween.Core;
 using FullCircleTween.Extensions;
 using FullCircleTween.Properties;
+using UnityEditor;
 using UnityEngine;
 
 namespace FullCircleTween.Components
@@ -11,11 +13,13 @@ namespace FullCircleTween.Components
     {
         public bool controlledByParent = true;
         [SerializeField] private string currentState = "Visible";
+
         [SerializeField] private List<TweenState> tweenStates = new()
         {
             new() { stateName = "Hidden" },
             new() { stateName = "Visible" }
         };
+
         public string[] StateNames => tweenStates?.Select(groupClip => groupClip.stateName).ToArray();
 
         public string CurrentState
@@ -38,7 +42,7 @@ namespace FullCircleTween.Components
         {
             var newState = TryGetState(stateName);
             if (newState == null) return;
-            
+
             KillAll();
             newState.Play(this);
             PropagateStateChangeToChildren(transform, newState.delay);
@@ -74,7 +78,7 @@ namespace FullCircleTween.Components
         private int GetStateIndex(string stateName) => tweenStates.FindIndex(clipGroup => clipGroup.stateName == stateName);
 
         public bool HasState(string stateName) => GetStateIndex(stateName) > -1;
-        
+
         public TweenState GetState(string stateName)
         {
             var index = GetStateIndex(stateName);

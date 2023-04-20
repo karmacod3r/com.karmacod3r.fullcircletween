@@ -34,7 +34,7 @@ namespace FullCircleTween.EditorGui
         {
             Dispose();
         }
-        
+
         public void ProcessEvents(Event ev)
         {
             switch (ev.type)
@@ -60,6 +60,7 @@ namespace FullCircleTween.EditorGui
                                 changed?.Invoke(options[selectedIndex]);
                                 DoClose();
                             }
+
                             break;
                         case KeyCode.Escape:
                             ev.Use();
@@ -68,12 +69,13 @@ namespace FullCircleTween.EditorGui
                     }
 
                     break;
-                
+
                 case EventType.MouseDown:
                     if (!position.Contains(ev.mousePosition))
                     {
                         Close();
                     }
+
                     break;
             }
         }
@@ -95,16 +97,17 @@ namespace FullCircleTween.EditorGui
                 {
                     DoClose();
                 }
-            } catch (Exception)
+            }
+            catch (Exception)
             {
                 Close();
                 Dispose();
                 DestroyImmediate(this);
                 return;
             }
-  
+
             InitStyles();
-            
+
             if (selectedIndex != lastSelectedIndex)
             {
                 lastSelectedIndex = selectedIndex;
@@ -203,10 +206,11 @@ namespace FullCircleTween.EditorGui
             closed = null;
         }
 
-        public new void Show()
+        public void ShowPopup()
         {
-            var showWithMode = typeof(EditorWindow).GetMethod("ShowPopupWithMode", BindingFlags.Instance | BindingFlags.NonPublic);
-            showWithMode.Invoke(this, new object[] {1, false});
+            var showAsDropDown = typeof(EditorWindow)
+                .GetMethods(BindingFlags.Instance | BindingFlags.NonPublic).First(info => info.GetParameters().Length == 5);
+            showAsDropDown.Invoke(this, new object[] { position, new Vector2(position.width, position.height), null, 1, false });
         }
     }
 }

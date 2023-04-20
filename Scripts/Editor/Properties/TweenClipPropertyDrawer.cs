@@ -1,6 +1,8 @@
 using System;
 using System.Globalization;
+using System.Linq;
 using FullCircleTween.Core;
+using FullCircleTween.EditorGui;
 using UnityEditor;
 using UnityEngine;
 
@@ -29,7 +31,7 @@ namespace FullCircleTween.Properties
             EditorGUI.PropertyField(controlRects[1], tweenTargetProperty, GUIContent.none);
             var targetComponent = TweenTarget.Deserialize(property.serializedObject.targetObject as Component, tweenTargetProperty.FindPropertyRelative("typeName").stringValue);
             var targetType = targetComponent?.GetType();
-            tweenMethodNameProperty.stringValue = TweenMethodPopup(controlRects[2], targetType, tweenMethodNameProperty.stringValue, "");
+            TweenMethodPopup(controlRects[2], targetType, tweenMethodNameProperty, "");
             toValueSerializedValueProperty.stringValue = ValueField(controlRects[3], TweenMethodCache.GetMethodTweenedType(TweenMethodCache.GetTweenMethodInfo(targetType, tweenMethodNameProperty.stringValue)), toValueSerializedValueProperty.stringValue);
             EditorGUI.PropertyField(controlRects[4], durationProperty, GUIContent.none);
 
@@ -80,11 +82,10 @@ namespace FullCircleTween.Properties
             return float.Parse(size, CultureInfo.InvariantCulture);
         }
 
-        private static string TweenMethodPopup(Rect position, Type targetType, string value, string label)
+        private static void TweenMethodPopup(Rect position, Type targetType, SerializedProperty property, string label)
         {
             var methodNames = TweenMethodCache.GetPopupMethodNames(targetType);
-            var index = EditorGUI.Popup(position, label, methodNames.IndexOf(value), methodNames.ToArray());
-            return index > -1 && index < methodNames.Count ? methodNames[index] : value;
+            EditorGuiEditablePopup.Draw(position, label, property, methodNames.ToList(), "");
         }
 
         public static string ValueField(Rect position, Type propertyType, string value)

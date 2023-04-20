@@ -94,7 +94,14 @@ namespace FullCircleTween.Core
 
         public ITween Then(Action callback)
         {
-            thenEvent += callback;
+            if (!completed && duration + delay > 0f)
+            {
+                thenEvent += callback;
+            }
+            else
+            {
+                callback();
+            }
 
             return this;
         }
@@ -139,16 +146,17 @@ namespace FullCircleTween.Core
                 : seconds > delay ? 1 : 0;
             var blend = easingFunction(Mathf.Clamp(pos, 0f, 1f));
             setter(lerpMethod(fromValue, toValue, blend));
+            
+            if (playing && seconds >= duration + delay)
+            {
+                CompleteTween();
+            }
         }
 
         public void Advance(float deltaSeconds)
         {
             var position = playHeadSeconds + deltaSeconds;
             Seek(position);
-            if (position >= duration + delay)
-            {
-                CompleteTween();
-            }
         }
 
         private void CompleteTween()
@@ -167,7 +175,7 @@ namespace FullCircleTween.Core
                 }
             }
 
-            Pause();
+            TweenManager.RemoveTween(this);
         }
 
         public static Tween<float> To(object target, Func<float> getter, Action<float> setter, float toValue, float duration, string memberName = "")

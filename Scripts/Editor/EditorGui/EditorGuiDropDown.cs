@@ -112,7 +112,7 @@ namespace FullCircleTween.EditorGui
             {
                 popupWindow = ScriptableObject.CreateInstance<PopupEditorWindow>();
                 currentPopupControlId = controlId;
-                popupWindow.Show();
+                popupWindow.ShowPopup();
                 popupWindow.property = property;
                 popupWindow.changed += value => { clickedOption = value; };
                 popupWindow.closed += () => { popupWindow = null; };

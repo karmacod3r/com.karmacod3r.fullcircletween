@@ -1,9 +1,7 @@
-using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
 using FullCircleTween.EditorGui;
-using FullCircleTween.Extensions;
 using UnityEditor;
 using UnityEngine;
 
@@ -13,11 +11,12 @@ namespace FullCircleTween.Attributes
     public class EditableDropDownAttributeDrawer : PropertyDrawer
     {
         private IEnumerable<string> options;
-        
+        private SerializedProperty property;
+
         public override void OnGUI(Rect position, SerializedProperty property, GUIContent label)
         {
+            this.property = property;
             var editableDropdownAttribute = (EditableDropDownAttribute)attribute;
-
             
             var options = AttributeDrawerUtils.GetOptions(property.serializedObject.targetObject, editableDropdownAttribute.optionsMemberName);
             if (property.propertyType != SerializedPropertyType.String || options == null)

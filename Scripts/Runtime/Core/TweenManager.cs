@@ -7,6 +7,7 @@ using FullCircleTween.Core.Interfaces;
 using UnityEngine;
 using UnityEngine.LowLevel;
 using Debug = UnityEngine.Debug;
+using Object = UnityEngine.Object;
 #if UNITY_EDITOR
 using System.IO;
 using UnityEditor;
@@ -28,7 +29,7 @@ namespace FullCircleTween.Core
                 cachedMethodCalls.Enqueue(() => AddTween(tween));
                 return;
             }
-
+            
             tweens.Add(tween);
         }
 
@@ -60,13 +61,11 @@ namespace FullCircleTween.Core
             initialized = true;
 
             tweens = new List<ITween>();
-            
+
             var go = new GameObject("FullCircleTween");
             go.AddComponent<UpdateDispatcher>();
             go.hideFlags = HideFlags.HideInHierarchy | HideFlags.HideInInspector | HideFlags.HideAndDontSave;
-            GameObject.DontDestroyOnLoad(go);
-            
-            LoadConfig();
+            Object.DontDestroyOnLoad(go);
         }
 
         internal static void UpdateTweens(float deltaSeconds)
@@ -76,17 +75,18 @@ namespace FullCircleTween.Core
                 SkipRunningTweens();
                 return;
             }
-            
+
             AdvanceTweens(deltaSeconds * FullCircleConfig.Instance.globalTweenTimeScale);
         }
-        
+
         private static void AdvanceTweens(float deltaSeconds)
         {
             inUpdate = true;
-            for (var i = 0; i < tweens.Count; i++)
+            foreach (var tween in tweens)
             {
-                tweens[i].Advance(deltaSeconds);
+                tween.Advance(deltaSeconds);
             }
+
             inUpdate = false;
 
             CallCachedMethods();
@@ -99,6 +99,7 @@ namespace FullCircleTween.Core
             {
                 tweens[i].Skip();
             }
+
             inUpdate = false;
 
             CallCachedMethods();
@@ -112,11 +113,6 @@ namespace FullCircleTween.Core
             }
         }
 
-        public static void LoadConfig()
-        {
-            FullCircleConfig.LoadConfig();
-        }
-
 #if UNITY_EDITOR
         private static Stopwatch stopWatch;
 
@@ -128,38 +124,20 @@ namespace FullCircleTween.Core
             stopWatch = new Stopwatch();
             EditorApplication.update -= OnEditorUpdate;
             EditorApplication.update += OnEditorUpdate;
-
-            LoadOrCreateConfig();
         }
 
-        private static void LoadOrCreateConfig()
-        {
-            var config = FullCircleConfig.LoadConfig();
-            if (!File.Exists(FullCircleConfig.ResourceFile))
-            {
-                SaveConfig(config);
-            }
-        }
-
-        private static void SaveConfig(FullCircleConfig config)
-        {
-            if (!Directory.Exists("Assets/Resources"))
-            {
-                Directory.CreateDirectory("Assets/Resources");
-            }
-            AssetDatabase.CreateAsset(config, FullCircleConfig.ResourceFile);
-            AssetDatabase.Refresh();
-        }
-        
         private static void OnEditorUpdate()
         {
             if (Application.isPlaying) return;
 
             UpdateTweens(stopWatch.ElapsedMilliseconds / 1000f);
             stopWatch.Restart();
-            
-            // Trigger player loop to enable updates and coroutines in edit mode
-            EditorApplication.QueuePlayerLoopUpdate();
+
+            if (FullCircleConfig.Instance.triggerUpdateInEditMode)
+            {
+                // Trigger player loop to enable updates and coroutines in edit mode
+                EditorApplication.QueuePlayerLoopUpdate();
+            }
         }
 #endif
     }

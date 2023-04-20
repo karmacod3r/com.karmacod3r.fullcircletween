@@ -4,6 +4,7 @@ using System.Linq;
 using FullCircleTween.Core;
 using FullCircleTween.Core.Interfaces;
 using UnityEngine;
+using Object = UnityEngine.Object;
 
 namespace FullCircleTween.Properties
 {
@@ -11,11 +12,18 @@ namespace FullCircleTween.Properties
     public class TweenGroupClip
     {
         public float delay;
-        [SerializeField] private EditableList<TweenClip> tweenClips = new EditableList<TweenClip>();
+        public EditableList<TweenClip> tweenClips = new EditableList<TweenClip>();
+
+        public event Action onComplete;
         
         private TweenGroup tweenGroup;
         private float pauseTime;
+        private Component context;
 
+        public TweenGroupClip()
+        {
+        }
+        
         public TweenGroupClip(TweenClip clip)
         {
             Add(clip);
@@ -68,6 +76,7 @@ namespace FullCircleTween.Properties
             }
 
             tweenGroup = Create(context);
+            this.context = context;
             tweenGroup.onComplete += OnTweenComplete;
             tweenGroup.Seek(pauseTime);
             tweenGroup.SetDelay(delay);
@@ -81,6 +90,19 @@ namespace FullCircleTween.Properties
         private void OnTweenComplete()
         {
             pauseTime = 0;
+            onComplete?.Invoke();
+
+            SetDirty(context.transform);   
+        }
+        
+        public static void SetDirty(Object target)
+        {
+#if UNITY_EDITOR
+            if (!Application.isPlaying && target != null)
+            {
+                UnityEditor.EditorUtility.SetDirty(target);
+            }
+#endif
         }
 
         public void Kill()

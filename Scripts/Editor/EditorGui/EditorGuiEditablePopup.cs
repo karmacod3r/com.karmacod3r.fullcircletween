@@ -14,7 +14,7 @@ namespace FullCircleTween.EditorGui
         private static int currentPopupControlId;
         private static string clickedOption;
         private static PopupEditorWindow popupWindow;
-        
+
         public static void Draw(Rect position, SerializedProperty property, List<string> values, string placeholder = "")
         {
             Draw(position, GUIContent.none, property, values);
@@ -34,20 +34,21 @@ namespace FullCircleTween.EditorGui
             {
                 popupWindow.ProcessEvents(Event.current);
             }
-            
+
+            var labelCopy = new GUIContent(label);
             property.stringValue = EditorGUI.TextField(position, label, property.stringValue);
             var controlId = EditorGUIReflectionUtils.LastControlId;
 
-            if (! string.IsNullOrEmpty(placeholder) && property.stringValue == "")
+            if (!string.IsNullOrEmpty(placeholder) && property.stringValue == "")
             {
                 GUI.color = new Color(1, 1, 1, 0.3f);
-                var rect = new Rect(position);
-                rect.x += 2;
+                var rect = FieldRect(position, labelCopy);
+                rect.x += 4;
                 EditorGUI.LabelField(rect, placeholder);
                 GUI.color = Color.white;
             }
             
-            if (GUI.GetNameOfFocusedControl() == controlName)
+            if (GUIUtility.keyboardControl == controlId)
             {
                 var options = values.Where(v => String.Equals(v, property.stringValue, StringComparison.CurrentCultureIgnoreCase))
                     .Concat(values.Where(v => v.ToLower().Contains(property.stringValue.ToLower()) && v != property.stringValue)).ToList();
@@ -58,39 +59,69 @@ namespace FullCircleTween.EditorGui
                     clickedOption = null;
                 }
 
-                var rect = new Rect(position);
-                if (label != GUIContent.none && label.text != "")
+                if (options.Contains(property.stringValue))
                 {
-                    rect.x += EditorGUIUtility.labelWidth + EditorGUIUtility.standardVerticalSpacing;
-                    rect.width -= EditorGUIUtility.labelWidth + EditorGUIUtility.standardVerticalSpacing * 2;
+                    ClosePopup(controlId);
                 }
-                rect.y += rect.height;
-
-                if (popupWindow == null)
+                else
                 {
-                    popupWindow = ScriptableObject.CreateInstance<PopupEditorWindow>();
-                    currentPopupControlId = controlId;
-                    popupWindow.Show();
-                    popupWindow.property = property;
-                    popupWindow.changed += value => { clickedOption = value; };
-                    popupWindow.closed += () =>
+                    var rect = new Rect(position);
+                    if (labelCopy != GUIContent.none && labelCopy.text != "")
                     {
-                        popupWindow.Dispose();
-                        popupWindow = null;
-                    };
-                }
+                        rect.x += EditorGUIUtility.labelWidth + EditorGUIUtility.standardVerticalSpacing;
+                        rect.width -= EditorGUIUtility.labelWidth + EditorGUIUtility.standardVerticalSpacing * 2;
+                    }
 
-                popupWindow.options = options;
-                popupWindow.AdjustSize(GUIUtility.GUIToScreenRect(rect));
-            } else
-            {
-                if (popupWindow != null && currentPopupControlId == controlId)
-                {
-                    popupWindow.Close();
-                    popupWindow.Dispose();
-                    popupWindow = null;
+                    rect.y += rect.height;
+
+                    if (popupWindow == null)
+                    {
+                        Selection.selectionChanged -= OnSelectionChanged;
+                        Selection.selectionChanged += OnSelectionChanged;
+                        popupWindow = ScriptableObject.CreateInstance<PopupEditorWindow>();
+                        currentPopupControlId = controlId;
+                        popupWindow.ShowPopup();
+                        popupWindow.property = property;
+                        popupWindow.changed += value => { clickedOption = value; };
+                        popupWindow.closed += () =>
+                        {
+                            popupWindow.Dispose();
+                            popupWindow = null;
+                            Selection.selectionChanged -= OnSelectionChanged;
+                        };
+                    }
+
+                    popupWindow.options = options;
+                    popupWindow.AdjustSize(GUIUtility.GUIToScreenRect(rect));
                 }
             }
+            else
+            {
+                ClosePopup(controlId);
+            }
+        }
+
+        private static void OnSelectionChanged()
+        {
+            ClosePopup(currentPopupControlId);
+        }
+
+        private static void ClosePopup(int controlId)
+        {
+            if (popupWindow != null && currentPopupControlId == controlId)
+            {
+                popupWindow.Close();
+                popupWindow.Dispose();
+                popupWindow = null;
+                Selection.selectionChanged -= OnSelectionChanged;
+            }
+        }
+
+        private static Rect FieldRect(Rect position, GUIContent label)
+        {
+            if (label == GUIContent.none || label.text == "") return position;
+
+            return new Rect(position.x + EditorGUIUtility.labelWidth, position.y, position.width - EditorGUIUtility.labelWidth, position.height);
         }
 
         private static void SetPropertyValue(SerializedProperty property, string value)

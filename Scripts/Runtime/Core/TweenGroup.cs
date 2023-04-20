@@ -191,6 +191,11 @@ namespace FullCircleTween.Core
             {
                 tween.Seek(seconds - delay);
             }
+            
+            if (seconds >= Duration + delay)
+            {
+                CompleteTween();
+            }
         }
 
         public ITween SetDelay(float value)
