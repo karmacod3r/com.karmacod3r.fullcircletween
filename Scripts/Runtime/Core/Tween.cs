@@ -143,7 +143,7 @@ namespace FullCircleTween.Core
 
             var pos = duration > 0 
                 ? Mathf.Clamp01((seconds - delay) / duration) 
-                : seconds > delay ? 1 : 0;
+                : seconds >= delay ? 1 : 0;
             var blend = easingFunction(Mathf.Clamp(pos, 0f, 1f));
             setter(lerpMethod(fromValue, toValue, blend));
             
