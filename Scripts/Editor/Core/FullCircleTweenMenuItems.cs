@@ -21,7 +21,7 @@ namespace FullCircleTween.Core
         [MenuItem("Window/Full Circle Tween/Skip running tweens _>", false, 2420)]
         private static void SkipRunningTweens()
         {
-            TweenManager.SkipRunningTweens();
+            TweenManager.SkipAll();
         }
     }
 }

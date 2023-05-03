@@ -19,7 +19,7 @@ namespace FullCircleTween.Properties
         private TweenGroup tweenGroup;
         private float pauseTime;
         private Component context;
-
+        
         public TweenGroupClip()
         {
         }
@@ -78,8 +78,8 @@ namespace FullCircleTween.Properties
             tweenGroup = Create(context);
             this.context = context;
             tweenGroup.onComplete += OnTweenComplete;
-            tweenGroup.Seek(pauseTime);
             tweenGroup.SetDelay(delay);
+            tweenGroup.Seek(pauseTime);
             pauseTime = 0;
             
             return tweenGroup;

@@ -1,15 +1,9 @@
 #define FULL_CIRCLE_TWEEN
 
-using System;
-using System.Collections.Generic;
 using System.Diagnostics;
 using FullCircleTween.Core.Interfaces;
 using UnityEngine;
-using UnityEngine.LowLevel;
-using Debug = UnityEngine.Debug;
-using Object = UnityEngine.Object;
 #if UNITY_EDITOR
-using System.IO;
 using UnityEditor;
 #endif
 
@@ -18,40 +12,11 @@ namespace FullCircleTween.Core
     public static class TweenManager
     {
         private static bool initialized;
-        private static List<ITween> tweens;
-        private static bool inUpdate;
-        private static Queue<Action> cachedMethodCalls = new();
-
-        internal static void AddTween(ITween tween)
-        {
-            if (inUpdate)
-            {
-                cachedMethodCalls.Enqueue(() => AddTween(tween));
-                return;
-            }
-            
-            tweens.Add(tween);
-        }
-
-        internal static void RemoveTween(ITween tween)
-        {
-            if (inUpdate)
-            {
-                cachedMethodCalls.Enqueue(() => RemoveTween(tween));
-                return;
-            }
-
-            tweens.Remove(tween);
-        }
+        public static TweenRunner Runner { get; } = new();
 
         internal static void KillTweensOf(object target)
         {
-            for (var i = tweens.Count - 1; i >= 0; i--)
-            {
-                var tween = tweens[i];
-                if (tween.Target != target) return;
-                tween.Kill();
-            }
+            Runner.KillTweensOf(target);
         }
 
         [RuntimeInitializeOnLoadMethod]
@@ -59,9 +24,7 @@ namespace FullCircleTween.Core
         {
             if (initialized || !Application.isPlaying) return;
             initialized = true;
-
-            tweens = new List<ITween>();
-
+            
             var go = new GameObject("FullCircleTween");
             go.AddComponent<UpdateDispatcher>();
             go.hideFlags = HideFlags.HideInHierarchy | HideFlags.HideInInspector | HideFlags.HideAndDontSave;
@@ -72,55 +35,24 @@ namespace FullCircleTween.Core
         {
             if (!Application.isPlaying && FullCircleConfig.Instance.skipTweensInEditMode)
             {
-                SkipRunningTweens();
+                SkipAll();
                 return;
             }
 
-            AdvanceTweens(deltaSeconds * FullCircleConfig.Instance.globalTweenTimeScale);
+            Runner.Advance(deltaSeconds * FullCircleConfig.Instance.globalTweenTimeScale);
         }
 
-        private static void AdvanceTweens(float deltaSeconds)
+        public static void SkipAll()
         {
-            inUpdate = true;
-            foreach (var tween in tweens)
-            {
-                tween.Advance(deltaSeconds);
-            }
-
-            inUpdate = false;
-
-            CallCachedMethods();
+            Runner.SkipAll();
         }
-
-        public static void SkipRunningTweens()
-        {
-            inUpdate = true;
-            for (var i = 0; i < tweens.Count; i++)
-            {
-                tweens[i].Skip();
-            }
-
-            inUpdate = false;
-
-            CallCachedMethods();
-        }
-
-        private static void CallCachedMethods()
-        {
-            while (cachedMethodCalls.Count > 0)
-            {
-                cachedMethodCalls.Dequeue()();
-            }
-        }
-
+        
 #if UNITY_EDITOR
         private static Stopwatch stopWatch;
 
         [InitializeOnLoadMethod]
         private static void EditorInitialize()
         {
-            tweens = new List<ITween>();
-
             stopWatch = new Stopwatch();
             EditorApplication.update -= OnEditorUpdate;
             EditorApplication.update += OnEditorUpdate;

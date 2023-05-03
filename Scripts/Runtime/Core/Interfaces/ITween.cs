@@ -11,7 +11,6 @@ namespace FullCircleTween.Core.Interfaces
         float Duration { get; }
         float Delay { get; }
         void Evaluate(float seconds);
-        void Advance(float deltaSeconds);
         void Skip();
         void Kill();
         void Play();
@@ -21,5 +20,7 @@ namespace FullCircleTween.Core.Interfaces
         ITween SetEasing(EasingFunction value);
         ITween SetTarget(object value);
         ITween Then(Action callback);
+        void Advance(float deltaSeconds);
+        void SetRunner(TweenRunner value);
     }
 }

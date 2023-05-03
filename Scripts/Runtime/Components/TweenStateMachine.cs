@@ -55,7 +55,7 @@ namespace FullCircleTween.Components
 
             foreach (var tweenPlayer in tweenPlayers)
             {
-                if (tweenPlayer == null || tweenPlayer == this || !tweenPlayer.controlledByParent || !tweenPlayer.HasState(currentState)) continue;
+                if (tweenPlayer == null || tweenPlayer == this || (!tweenPlayer.controlledByParent && tweenPlayer.HasState(currentState))) continue;
 
                 tweenGroup.Insert(tweenPlayer.ApplyStateFromParent(currentState), 0);
             }

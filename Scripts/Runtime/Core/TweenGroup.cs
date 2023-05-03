@@ -10,16 +10,20 @@ namespace FullCircleTween.Core
     {
         private List<ITween> tweens = new List<ITween>();
 
-        private object target;
+        private TweenRunner parentRunner;
+        private TweenRunner childRunner = new TweenRunner();
+
         private bool playing;
         private bool completed;
         private float delay;
+        
         private float playHeadSeconds;
 
         public bool IsPlaying => playing;
         public bool Completed => completed;
-        public object Target => target;
+        public object Target => this;
         public float PlayHeadSeconds => playHeadSeconds;
+
         public float Duration
         {
             get
@@ -39,16 +43,10 @@ namespace FullCircleTween.Core
         public event Action onComplete;
         private event Action thenEvent;
 
-        public TweenGroup(object target, IEnumerable<ITween> tweens = null)
-        {
-            this.target = target;
-            Insert(tweens);            
-            Play();
-        }
-
         public TweenGroup(IEnumerable<ITween> tweens = null)
         {
-            target = this;
+            parentRunner = TweenManager.Runner;
+            
             Insert(tweens);
             Play();
         }
@@ -56,21 +54,27 @@ namespace FullCircleTween.Core
         public TweenGroup Insert(ITween tween, float offsetSeconds = 0)
         {
             if (tween == null) return this;
-            
-            tween.Pause();
-            tween.SetTarget(target);
+
+            tween.SetTarget(this);
             tween.SetDelay(tween.Delay + offsetSeconds);
+            tween.SetRunner(childRunner);
             tweens.Add(tween);
-            
+
+            tween.Pause();
+            if (playing)
+            {
+                tween.Play();
+            }
+
             SortTweens();
-            
+
             return this;
         }
 
         public TweenGroup Insert(IEnumerable<ITween> tweens, float offsetSeconds = 0)
         {
             if (tweens == null) return this;
-            
+
             foreach (var tween in tweens)
             {
                 Insert(tween, offsetSeconds);
@@ -85,14 +89,14 @@ namespace FullCircleTween.Core
             {
                 var rightA = a.Delay + a.Duration;
                 var rightB = b.Delay + b.Duration;
-                return rightA < rightB ? -1 : rightA == rightB ? 0 : 1;
+                return rightA.CompareTo(rightB); 
             });
         }
 
         public TweenGroup Append(ITween tween)
         {
             if (tween == null) return this;
-            
+
             Insert(tween, Duration);
             return this;
         }
@@ -100,7 +104,7 @@ namespace FullCircleTween.Core
         public TweenGroup Append(IEnumerable<ITween> tweens)
         {
             if (tweens == null) return this;
-            
+
             Insert(tweens, Duration);
             return this;
         }
@@ -123,36 +127,40 @@ namespace FullCircleTween.Core
 
         public void Evaluate(float seconds)
         {
-            foreach (var tween in tweens)
-            {
-                tween.Evaluate(seconds - delay);
-            }
         }
 
-        public void Advance(float deltaSeconds)
+        public void SetRunner(TweenRunner value)
         {
-            var position = playHeadSeconds + deltaSeconds;
-            var d = playHeadSeconds <= delay
-                ? position > delay ? position - delay : 0f
-                : deltaSeconds;
-
-            var totalDuration = Duration + delay;
-            playHeadSeconds = Mathf.Clamp(position, 0f, totalDuration);
-            foreach (var tween in tweens)
+            parentRunner.Remove(this);
+            parentRunner = value;
+            
+            if (playing && !completed)
             {
-                tween.Pause();
-                tween.Advance(d);
-            }
-
-            if (position >= totalDuration)
-            {
-                CompleteTween();
+                parentRunner.Add(this);                    
             }
         }
 
         public void Skip()
         {
             Seek(delay + Duration);
+        }
+
+        public void Advance(float deltaSeconds)
+        {
+            Seek(playHeadSeconds + deltaSeconds);
+        }
+
+        public void Seek(float seconds)
+        {
+            playHeadSeconds = seconds;
+            var totalDuration = Duration + delay;
+            
+            childRunner.Seek(playHeadSeconds - delay);
+
+            if (playing && playHeadSeconds >= totalDuration)
+            {
+                CompleteTween();
+            }
         }
 
         private void CompleteTween()
@@ -167,7 +175,7 @@ namespace FullCircleTween.Core
                 // remove all listeners
                 foreach (var d in thenEvent.GetInvocationList())
                 {
-                    thenEvent -= (Action) d;
+                    thenEvent -= (Action)d;
                 }
             }
 
@@ -191,27 +199,24 @@ namespace FullCircleTween.Core
                 Seek(0);
                 completed = false;
             }
+
             playing = true;
-            TweenManager.AddTween(this);
+            parentRunner.Add(this);
+            
+            foreach (var tween in tweens)
+            {
+                tween.Play();
+            }
         }
 
         public void Pause()
         {
             playing = false;
-            TweenManager.RemoveTween(this);
-        }
-
-        public void Seek(float seconds)
-        {
-            playHeadSeconds = seconds;
+            parentRunner.Remove(this);
+            
             foreach (var tween in tweens)
             {
-                tween.Seek(seconds - delay);
-            }
-            
-            if (seconds >= Duration + delay)
-            {
-                CompleteTween();
+                tween.Pause();
             }
         }
 
@@ -230,21 +235,31 @@ namespace FullCircleTween.Core
 
             return this;
         }
-        
+
         public ITween SetTarget(object value)
         {
-            target = value;
-            foreach (var tween in tweens)
-            {
-                tween.SetTarget(target);
-            }
-            
             return this;
         }
 
         public ITween Then(Action callback)
         {
             throw new NotImplementedException();
+        }
+        
+        public void KillTweensOf(object target)
+        {
+            for (var i = tweens.Count - 1; i >= 0; i--)
+            {
+                var tween = tweens[i];
+
+                if (tween is TweenGroup group)
+                {
+                    group.KillTweensOf(target);
+                } else if (tween.Target == target)
+                {
+                    tween.Kill();
+                }
+            }
         }
     }
 }

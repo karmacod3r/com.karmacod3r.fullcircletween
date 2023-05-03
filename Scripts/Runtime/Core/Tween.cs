@@ -14,6 +14,7 @@ namespace FullCircleTween.Core
 
         internal string memberName;
         
+        private TweenRunner runner;
         private TweenLerpMethod lerpMethod;
         internal object target;
         private Func<T> getter;
@@ -31,7 +32,7 @@ namespace FullCircleTween.Core
 
         public event Action onComplete;
         private event Action thenEvent;
-        
+
         public bool IsPlaying => playing;
         public bool Completed => completed;
         public object Target => target;
@@ -54,6 +55,8 @@ namespace FullCircleTween.Core
             this.duration = duration;
             this.memberName = memberName;
 
+            runner = TweenManager.Runner;
+
             Play();
         }
 
@@ -66,13 +69,13 @@ namespace FullCircleTween.Core
             }
             playing = true;
             cachedFromValue = false;
-            TweenManager.AddTween(this);
+            runner.Add(this);
         }
 
         public void Pause()
         {
             playing = false;
-            TweenManager.RemoveTween(this);
+            runner.Remove(this);
         }
 
         public void Skip()
@@ -88,8 +91,8 @@ namespace FullCircleTween.Core
 
         public void Seek(float seconds)
         {
-            playHeadSeconds = Mathf.Clamp(seconds, 0f, duration + delay);
-            Evaluate(seconds);
+            playHeadSeconds = seconds;
+            Evaluate(playHeadSeconds);
         }
 
         public ITween Then(Action callback)
@@ -104,6 +107,22 @@ namespace FullCircleTween.Core
             }
 
             return this;
+        }
+
+        public void Advance(float deltaSeconds)
+        {
+            Seek(playHeadSeconds + deltaSeconds);
+        }
+
+        public void SetRunner(TweenRunner value)
+        {
+            runner.Remove(this);
+            runner = value;
+            
+            if (playing && !completed)
+            {
+                runner.Add(this);                    
+            }
         }
 
         public ITween SetEasing(EasingFunction value)
@@ -153,12 +172,6 @@ namespace FullCircleTween.Core
             }
         }
 
-        public void Advance(float deltaSeconds)
-        {
-            var position = playHeadSeconds + deltaSeconds;
-            Seek(position);
-        }
-
         private void CompleteTween()
         {
             completed = true;
@@ -175,7 +188,7 @@ namespace FullCircleTween.Core
                 }
             }
 
-            TweenManager.RemoveTween(this);
+            runner.Remove(this);
         }
 
         public static Tween<float> To(object target, Func<float> getter, Action<float> setter, float toValue, float duration, string memberName = "")
