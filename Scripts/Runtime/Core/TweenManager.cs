@@ -1,8 +1,11 @@
 #define FULL_CIRCLE_TWEEN
 
+using System;
 using System.Diagnostics;
 using FullCircleTween.Core.Interfaces;
+using FullCircleTween.Extensions;
 using UnityEngine;
+using Object = UnityEngine.Object;
 #if UNITY_EDITOR
 using UnityEditor;
 #endif
@@ -46,6 +49,11 @@ namespace FullCircleTween.Core
         {
             Runner.SkipAll();
         }
+
+        public static void KillAll()
+        {
+            Runner.KillAllTweens();
+        }
         
 #if UNITY_EDITOR
         private static Stopwatch stopWatch;
@@ -54,8 +62,21 @@ namespace FullCircleTween.Core
         private static void EditorInitialize()
         {
             stopWatch = new Stopwatch();
+            EditorApplication.playModeStateChanged -= OnPlayModeState;
+            EditorApplication.playModeStateChanged += OnPlayModeState;
             EditorApplication.update -= OnEditorUpdate;
             EditorApplication.update += OnEditorUpdate;
+        }
+
+        private static void OnPlayModeState(PlayModeStateChange state)
+        {
+            switch (state)
+            {
+                case PlayModeStateChange.ExitingEditMode:
+                case PlayModeStateChange.ExitingPlayMode:
+                    KillAll();
+                    break;
+            }
         }
 
         private static void OnEditorUpdate()

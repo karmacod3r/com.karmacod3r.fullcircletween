@@ -91,8 +91,13 @@ namespace FullCircleTween.Properties
         {
             pauseTime = 0;
             onComplete?.Invoke();
-
-            SetDirty(context.transform);   
+            
+#if UNITY_EDITOR
+            if (context != null)
+            {
+                SetDirty(context.transform);   
+            }
+#endif
         }
         
         public static void SetDirty(Object target)
