@@ -152,6 +152,14 @@ namespace FullCircleTween.Core
 
         public void Evaluate(float seconds)
         {
+#if UNITY_EDITOR
+            if (target == null)
+            {
+                Kill();
+                return;
+            }
+#endif
+
             if (seconds < delay) return;
 
             if (!cachedFromValue)

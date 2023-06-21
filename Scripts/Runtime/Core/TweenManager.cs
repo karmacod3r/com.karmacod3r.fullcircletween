@@ -25,6 +25,8 @@ namespace FullCircleTween.Core
         [RuntimeInitializeOnLoadMethod]
         private static void Initialize()
         {
+            KillAll();
+            
             if (initialized || !Application.isPlaying) return;
             initialized = true;
             
@@ -61,6 +63,8 @@ namespace FullCircleTween.Core
         [InitializeOnLoadMethod]
         private static void EditorInitialize()
         {
+            KillAll();
+            
             stopWatch = new Stopwatch();
             EditorApplication.playModeStateChanged -= OnPlayModeState;
             EditorApplication.playModeStateChanged += OnPlayModeState;
