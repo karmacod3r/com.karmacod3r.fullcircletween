@@ -71,6 +71,11 @@ namespace FullCircleTween.Core
             EditorApplication.update -= OnEditorUpdate;
             EditorApplication.update += OnEditorUpdate;
         }
+        
+        [UnityEditor.Callbacks.DidReloadScripts]
+        private static void OnScriptsReloaded() {
+            KillAll();
+        }
 
         private static void OnPlayModeState(PlayModeStateChange state)
         {
