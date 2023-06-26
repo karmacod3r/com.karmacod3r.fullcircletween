@@ -17,6 +17,8 @@ namespace FullCircleTween.Core
 
         public void Add(ITween tween)
         {
+            if (tween == null) return;
+            
             if (inUpdate)
             {
                 cachedMethodCalls.Enqueue(() => Add(tween));
@@ -28,6 +30,8 @@ namespace FullCircleTween.Core
 
         public void Remove(ITween tween)
         {
+            if (tween == null) return;
+
             if (inUpdate)
             {
                 cachedMethodCalls.Enqueue(() => Remove(tween));

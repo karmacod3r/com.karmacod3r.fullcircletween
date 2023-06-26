@@ -17,7 +17,13 @@ namespace FullCircleTween.Core
         
         private TweenRunner runner;
         private TweenLerpMethod lerpMethod;
+        
         internal object target;
+        private bool targetIsComponent;
+        private Component targetComponent;
+        private bool targetIsObject;
+        private Object targetObject;
+        
         private Func<T> getter;
         private Action<T> setter;
         private float delay;
@@ -55,19 +61,27 @@ namespace FullCircleTween.Core
             this.toValue = toValue;
             this.duration = duration;
             this.memberName = memberName;
+            
+            targetComponent = target as Component;
+            targetIsComponent = targetComponent != null;
+            targetObject = target as Object;
+            targetIsObject = targetObject != null;
 
             runner = TweenManager.Runner;
 
             Play();
         }
+
+        private bool TargetIsValid()
+        {
+            return target != null 
+                   && (!targetIsComponent || targetComponent.gameObject != null)
+                   && (!targetIsObject || targetObject != null);
+        }
         
         public void Play()
         {
-            if (target == null || getter == null || setter == null
-                || (target is Component component && component.gameObject == null)
-                || (target is GameObject gameObject && gameObject == null)
-                || (target is Object unityObject && unityObject == null)
-                )
+            if (getter == null || setter == null || !TargetIsValid())
             {
                 Kill();
                 return;
@@ -163,13 +177,7 @@ namespace FullCircleTween.Core
 
         public void Evaluate(float seconds)
         {
-            if (target == null)
-            {
-                Kill();
-                return;
-            }
-            
-            if (Application.isEditor && target is UnityEngine.Object unityObject && unityObject == null)
+            if (!TargetIsValid())
             {
                 Kill();
                 return;
