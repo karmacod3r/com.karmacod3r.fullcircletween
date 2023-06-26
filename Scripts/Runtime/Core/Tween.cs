@@ -4,6 +4,7 @@ using System.Threading.Tasks;
 using FullCircleTween.Components;
 using FullCircleTween.Core.Interfaces;
 using UnityEngine;
+using Object = UnityEngine.Object;
 
 namespace FullCircleTween.Core
 {
@@ -59,9 +60,19 @@ namespace FullCircleTween.Core
 
             Play();
         }
-
+        
         public void Play()
         {
+            if (target == null || getter == null || setter == null
+                || (target is Component component && component.gameObject == null)
+                || (target is GameObject gameObject && gameObject == null)
+                || (target is Object unityObject && unityObject == null)
+                )
+            {
+                Kill();
+                return;
+            }
+
             if (completed)
             {
                 completed = false;
