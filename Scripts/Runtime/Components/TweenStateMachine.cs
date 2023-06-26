@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using FullCircleTween.Attributes;
@@ -133,6 +134,16 @@ namespace FullCircleTween.Components
         public void Pause(string stateName)
         {
             TryGetState(stateName)?.Pause();
+        }
+
+        private void OnDestroy()
+        {
+            KillAll();
+        }
+
+        private void OnDisable()
+        {
+            KillAll();
         }
 
         private int stateIndex;

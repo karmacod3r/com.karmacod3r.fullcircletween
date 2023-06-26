@@ -10,5 +10,10 @@ namespace FullCircleTween.Core
         {
             TweenManager.UpdateTweens(Time.deltaTime);
         }
+
+        private void OnDestroy()
+        {
+            TweenManager.KillAll();
+        }
     }
 }

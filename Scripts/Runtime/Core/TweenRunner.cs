@@ -1,6 +1,10 @@
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using FullCircleTween.Core.Interfaces;
+using UnityEngine;
+using UnityEngine.SceneManagement;
+using Object = UnityEngine.Object;
 
 namespace FullCircleTween.Core
 {
@@ -67,6 +71,14 @@ namespace FullCircleTween.Core
                     tween.Kill();
                 }
             }
+        }
+
+        public void KillSceneTweens(Scene scene)
+        {
+            var sceneTweens = tweens.Where(t => t.Target is Component component && component.gameObject.scene == scene
+            || (t.Target is GameObject gameObject && gameObject.scene == scene)).ToList();
+            
+            sceneTweens.ForEach(t => t.Kill());
         }
 
         public void Seek(float seconds)

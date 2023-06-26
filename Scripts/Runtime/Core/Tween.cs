@@ -86,7 +86,7 @@ namespace FullCircleTween.Core
         public void Kill()
         {
             Pause();
-            cachedFromValue = false;
+            runner.Remove(this);
         }
 
         public void Seek(float seconds)
@@ -152,13 +152,17 @@ namespace FullCircleTween.Core
 
         public void Evaluate(float seconds)
         {
-#if UNITY_EDITOR
             if (target == null)
             {
                 Kill();
                 return;
             }
-#endif
+            
+            if (Application.isEditor && target is UnityEngine.Object unityObject && unityObject == null)
+            {
+                Kill();
+                return;
+            }
 
             if (seconds < delay) return;
 

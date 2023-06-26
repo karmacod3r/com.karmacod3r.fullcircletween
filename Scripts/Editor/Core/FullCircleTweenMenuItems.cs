@@ -23,5 +23,11 @@ namespace FullCircleTween.Core
         {
             TweenManager.SkipAll();
         }
+        
+        [MenuItem("Window/Full Circle Tween/Kill all tweens", false, 2430)]
+        private static void KillAllTweens()
+        {
+            TweenManager.KillAll();
+        }
     }
 }

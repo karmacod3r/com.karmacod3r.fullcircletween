@@ -5,9 +5,11 @@ using System.Diagnostics;
 using FullCircleTween.Core.Interfaces;
 using FullCircleTween.Extensions;
 using UnityEngine;
+using UnityEngine.SceneManagement;
 using Object = UnityEngine.Object;
 #if UNITY_EDITOR
 using UnityEditor;
+using UnityEditor.SceneManagement;
 #endif
 
 namespace FullCircleTween.Core
@@ -70,8 +72,10 @@ namespace FullCircleTween.Core
             EditorApplication.playModeStateChanged += OnPlayModeState;
             EditorApplication.update -= OnEditorUpdate;
             EditorApplication.update += OnEditorUpdate;
+            EditorSceneManager.sceneClosing -= OnSceneClosing;
+            EditorSceneManager.sceneClosing += OnSceneClosing;
         }
-        
+
         [UnityEditor.Callbacks.DidReloadScripts]
         private static void OnScriptsReloaded() {
             KillAll();
@@ -99,6 +103,14 @@ namespace FullCircleTween.Core
             {
                 // Trigger player loop to enable updates and coroutines in edit mode
                 EditorApplication.QueuePlayerLoopUpdate();
+            }
+        }
+
+        private static void OnSceneClosing(Scene scene, bool removingscene)
+        {
+            if (removingscene)
+            {
+                Runner.KillSceneTweens(scene);
             }
         }
 #endif
