@@ -69,13 +69,19 @@ namespace FullCircleTween.Properties
 
         public TweenGroup Play(Component context)
         {
+            Play(context, Create(context));
+            return tweenGroup;
+        }
+
+        public TweenGroup Play(Component context, TweenGroup group)
+        {
             if (tweenGroup != null)
             {
                 tweenGroup.onComplete -= OnTweenComplete;
                 tweenGroup.Kill();
             }
 
-            tweenGroup = Create(context);
+            tweenGroup = group;
             this.context = context;
             tweenGroup.onComplete += OnTweenComplete;
             tweenGroup.SetDelay(delay);

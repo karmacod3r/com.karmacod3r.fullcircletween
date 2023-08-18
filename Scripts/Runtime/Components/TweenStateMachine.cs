@@ -46,8 +46,9 @@ namespace FullCircleTween.Components
             if (newState == null) return;
 
             KillAll();
-            var tweenGroup = newState.Play(this);
+            var tweenGroup = newState.Create(this);
             ApplyChildTweens(transform, tweenGroup, stateName);
+            newState.Play(this, tweenGroup);
         }
 
         private void ApplyChildTweens(Transform root, TweenGroup tweenGroup, string stateName)
