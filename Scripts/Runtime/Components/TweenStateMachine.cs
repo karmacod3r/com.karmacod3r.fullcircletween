@@ -47,33 +47,39 @@ namespace FullCircleTween.Components
 
             KillAll();
             var tweenGroup = newState.Play(this);
-            ApplyChildTweens(transform, tweenGroup);
+            ApplyChildTweens(transform, tweenGroup, stateName);
         }
 
-        private void ApplyChildTweens(Transform root, TweenGroup tweenGroup)
+        private void ApplyChildTweens(Transform root, TweenGroup tweenGroup, string stateName)
         {
             var tweenPlayers = root.GetComponents<TweenStateMachine>();
 
             foreach (var tweenPlayer in tweenPlayers)
             {
-                if (tweenPlayer == null || tweenPlayer == this || (!tweenPlayer.controlledByParent && tweenPlayer.HasState(currentState))) continue;
+                if (tweenPlayer == null || tweenPlayer == this) continue;
 
-                tweenGroup.Insert(tweenPlayer.ApplyStateFromParent(currentState), 0);
+                tweenPlayer.ApplyStateFromParent(stateName, tweenGroup);
             }
             
             foreach (Transform child in root)
             {
-                ApplyChildTweens(child, tweenGroup);
+                ApplyChildTweens(child, tweenGroup, stateName);
             }
         }
 
-        private TweenGroup ApplyStateFromParent(string value)
+        private void ApplyStateFromParent(string value, TweenGroup targetTweenGroup)
         {
+            if (!controlledByParent) return;
+            
+            var newState = TryGetState(value);
+            if (newState == null) return;
+            
             currentState = value;
-            return TryGetState(currentState)?.Play(transform);
+            var tween = newState.Play(transform);
+            targetTweenGroup.Insert(tween, 0);
         }
 
-        private int GetStateIndex(string stateName) => tweenStates.FindIndex(clipGroup => clipGroup.stateName == stateName);
+        public int GetStateIndex(string stateName) => tweenStates.FindIndex(state => state.StateNameMatches(stateName));
 
         public bool HasState(string stateName) => GetStateIndex(stateName) > -1;
 

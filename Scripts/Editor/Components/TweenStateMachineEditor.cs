@@ -19,12 +19,17 @@ namespace FullCircleTween.Components
             public string propertyPath;
         }
 
+        private GUIStyle richTextStyle;
+        
+        private const string MatchOperatorColor = "#aa0000";
         private const string StateDefaultName = "New State";
         
         private TweenStateMachineEditorState state;
 
         public override void OnInspectorGUI()
         {
+            InitStyles();
+            
             var tweenStateMachine = target as TweenStateMachine;
             
             var controlID = GUIUtility.GetControlID(FocusType.Passive);
@@ -72,6 +77,17 @@ namespace FullCircleTween.Components
             serializedObject.ApplyModifiedProperties();
         }
 
+        private void InitStyles()
+        {
+            if (richTextStyle == null)
+            {
+                richTextStyle = new(GUI.skin.label)
+                {
+                    richText = true
+                };
+            }
+        }
+
         private int DrawStateList(SerializedProperty listProperty, SerializedProperty property, int index)
         {
             if (state.editableList == null || !state.editableList.IsValid || property.propertyPath != state.propertyPath)
@@ -108,6 +124,7 @@ namespace FullCircleTween.Components
 
         private void TweenStateListDrawElementCallback(Rect rect, SerializedProperty listProperty, SerializedProperty element, int index, bool isActive, bool isFocused)
         {
+            var tweenState = element.CastTo<TweenState>();
             var stateName = element.FindPropertyRelative("stateName");
             var currentState = serializedObject.FindProperty("currentState");
             
@@ -115,17 +132,42 @@ namespace FullCircleTween.Components
 
             var labelRect = rect;
             labelRect.width -= buttonWidth;
-            EditorGUI.LabelField(labelRect, stateName.stringValue);
+            EditorGUI.LabelField(labelRect, GetTweenStateLabel(tweenState), richTextStyle);
 
             var buttonRect = labelRect;
             buttonRect.x = labelRect.xMax;
             buttonRect.width = buttonWidth;
-            var selected = currentState.stringValue == stateName.stringValue;
+
+            var stateMachine = target as TweenStateMachine;
+            var selected = stateMachine.GetState(currentState.stringValue) == tweenState;
             var newSelected = GUI.Toggle(buttonRect, selected, "", EditorStyles.radioButton);
             if (newSelected && !selected)
             {
                 SetCurrentTweenState(stateName.stringValue);
             }
+        }
+
+        private string GetTweenStateLabel(TweenState tweenState)
+        {
+            if (tweenState == null) return "";
+
+            switch (tweenState.matchType)
+            {
+                case TweenState.TweenStateMatchType.Equal:
+                    return tweenState.stateName;
+                case TweenState.TweenStateMatchType.NotEqual:
+                    return $"<color=\"{MatchOperatorColor}\">!=</color> " + tweenState.stateName;
+                case TweenState.TweenStateMatchType.RegexMatch:
+                    return $"<color=\"{MatchOperatorColor}\">/{tweenState.stateRegex}/</color> " + tweenState.stateName;
+                case TweenState.TweenStateMatchType.RegexNoMatch:
+                    return $"<color=\"{MatchOperatorColor}\">!= /{tweenState.stateRegex}/</color> " + tweenState.stateName;
+                case TweenState.TweenStateMatchType.CatchAll:
+                    return $"<color=\"{MatchOperatorColor}\">*</color> " + tweenState.stateName;
+                default:
+                    throw new ArgumentOutOfRangeException();
+            }
+
+            return "";
         }
 
         private void SetCurrentTweenState(string stateName)

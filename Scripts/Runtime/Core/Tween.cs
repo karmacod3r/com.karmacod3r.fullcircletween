@@ -14,16 +14,16 @@ namespace FullCircleTween.Core
         public delegate T TweenLerpMethod(T fromValue, T toValue, float blend);
 
         internal string memberName;
-        
+
         private TweenRunner runner;
         private TweenLerpMethod lerpMethod;
-        
+
         internal object target;
         private bool targetIsComponent;
         private Component targetComponent;
         private bool targetIsObject;
         private Object targetObject;
-        
+
         private Func<T> getter;
         private Action<T> setter;
         private float delay;
@@ -61,7 +61,7 @@ namespace FullCircleTween.Core
             this.toValue = toValue;
             this.duration = duration;
             this.memberName = memberName;
-            
+
             targetComponent = target as Component;
             targetIsComponent = targetComponent != null;
             targetObject = target as Object;
@@ -74,11 +74,12 @@ namespace FullCircleTween.Core
 
         private bool TargetIsValid()
         {
-            return target != null 
-                   && (!targetIsComponent || targetComponent.gameObject != null)
-                   && (!targetIsObject || targetObject != null);
+            if (targetIsComponent) return targetComponent != null && targetComponent.gameObject != null;
+            if (targetIsObject) return targetObject != null;
+            
+            return target != null;
         }
-        
+
         public void Play()
         {
             if (getter == null || setter == null || !TargetIsValid())
@@ -92,6 +93,7 @@ namespace FullCircleTween.Core
                 completed = false;
                 Seek(0);
             }
+
             playing = true;
             cachedFromValue = false;
             runner.Add(this);
@@ -143,10 +145,10 @@ namespace FullCircleTween.Core
         {
             runner.Remove(this);
             runner = value;
-            
+
             if (playing && !completed)
             {
-                runner.Add(this);                    
+                runner.Add(this);
             }
         }
 
@@ -161,7 +163,7 @@ namespace FullCircleTween.Core
             delay = value;
             return this;
         }
-        
+
         public ITween SetFrom(T value)
         {
             fromValue = value;
@@ -191,12 +193,14 @@ namespace FullCircleTween.Core
                 fromValue = getter();
             }
 
-            var pos = duration > 0 
-                ? Mathf.Clamp01((seconds - delay) / duration) 
-                : seconds >= delay ? 1 : 0;
+            var pos = duration > 0
+                ? Mathf.Clamp01((seconds - delay) / duration)
+                : seconds >= delay
+                    ? 1
+                    : 0;
             var blend = easingFunction(Mathf.Clamp(pos, 0f, 1f));
             setter(lerpMethod(fromValue, toValue, blend));
-            
+
             if (playing && seconds >= duration + delay)
             {
                 CompleteTween();
@@ -211,11 +215,11 @@ namespace FullCircleTween.Core
             if (thenEvent != null)
             {
                 thenEvent.Invoke();
-                
+
                 // remove all listeners
                 foreach (var d in thenEvent.GetInvocationList())
                 {
-                    thenEvent -= (Action) d;
+                    thenEvent -= (Action)d;
                 }
             }
 

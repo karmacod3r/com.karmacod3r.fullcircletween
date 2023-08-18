@@ -29,7 +29,7 @@ namespace FullCircleTween.Properties
         /// </summary>
         /// <param name="serializedProperty">Parent `SerializedProperty`.</param>
         /// <returns>Collection of `SerializedProperty` children.</returns>
-        public static IEnumerable<SerializedProperty> GetVisibleChildren(SerializedProperty serializedProperty)
+        protected static IEnumerable<SerializedProperty> GetVisibleChildren(SerializedProperty serializedProperty)
         {
             SerializedProperty currentProperty = serializedProperty.Copy();
             SerializedProperty nextSiblingProperty = serializedProperty.Copy();
