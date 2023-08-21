@@ -46,49 +46,53 @@ namespace FullCircleTween.Components
             if (newState == null) return;
 
             KillAll();
-            var tweenGroup = newState.Create(this);
+            var tweenGroup = newState.tweenGroup.Create(this);
             
             foreach (Transform child in transform)
             {
                 ApplyChildTweens(child, tweenGroup, stateName);
             }
-            newState.Play(this, tweenGroup);
+            newState.tweenGroup.Play(this, tweenGroup);
         }
 
         private void ApplyChildTweens(Transform root, TweenGroup tweenGroup, string stateName)
         {
             var tweenPlayers = root.GetComponents<TweenStateMachine>();
 
-            var stateApplied = false;
+            string appliedState = null;
             foreach (var tweenPlayer in tweenPlayers)
             {
                 if (tweenPlayer == null || tweenPlayer == this) continue;
 
-                stateApplied = stateApplied || tweenPlayer.ApplyStateFromParent(stateName, tweenGroup);
+                var newState = tweenPlayer.ApplyStateFromParent(stateName, tweenGroup);
+                if (newState != null && appliedState == null)
+                {
+                    appliedState = newState.stateName;
+                }
             }
 
             // Only apply to children, if no other tween players are present or state was applied
-            if (tweenPlayers.Length == 0 || stateApplied)
+            if (tweenPlayers.Length == 0 || appliedState != null)
             {
                 foreach (Transform child in root)
                 {
-                    ApplyChildTweens(child, tweenGroup, stateName);
+                    ApplyChildTweens(child, tweenGroup, appliedState);
                 }
             }
         }
 
-        private bool ApplyStateFromParent(string value, TweenGroup targetTweenGroup)
+        private TweenState ApplyStateFromParent(string value, TweenGroup targetTweenGroup)
         {
-            if (!controlledByParent) return false;
+            if (!controlledByParent) return null;
 
             var newState = TryGetState(value);
-            if (newState == null) return false;
+            if (newState == null) return null;
 
             currentState = value;
-            var tween = newState.Play(transform);
+            var tween = newState.tweenGroup.Play(transform);
             targetTweenGroup.Insert(tween, 0);
 
-            return true;
+            return newState;
         }
 
         public int GetStateIndex(string stateName) => tweenStates.FindIndex(state => state.StateNameMatches(stateName));
@@ -131,7 +135,7 @@ namespace FullCircleTween.Components
             tweenStates.RemoveAt(index);
         }
 
-        private TweenGroupClip TryGetState(string stateName)
+        private TweenState TryGetState(string stateName)
         {
             var index = GetStateIndex(stateName);
             if (index == -1)
@@ -139,12 +143,12 @@ namespace FullCircleTween.Components
                 return null;
             }
 
-            return tweenStates[index].tweenGroup;
+            return tweenStates[index];
         }
 
         private void Play(string stateName)
         {
-            TryGetState(stateName)?.Play(this);
+            TryGetState(stateName)?.tweenGroup.Play(this);
         }
 
         public void KillAll()
@@ -155,7 +159,7 @@ namespace FullCircleTween.Components
 
         public void Pause(string stateName)
         {
-            TryGetState(stateName)?.Pause();
+            TryGetState(stateName)?.tweenGroup.Pause();
         }
 
         private void OnDestroy()

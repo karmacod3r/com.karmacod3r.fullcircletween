@@ -1,6 +1,9 @@
 using System;
 using System.Text.RegularExpressions;
 using FullCircleTween.Attributes;
+using FullCircleTween.Components;
+using FullCircleTween.Core;
+using FullCircleTween.Core.Interfaces;
 using UnityEngine;
 
 namespace FullCircleTween.Properties
