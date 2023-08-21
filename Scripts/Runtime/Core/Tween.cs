@@ -152,6 +152,11 @@ namespace FullCircleTween.Core
             }
         }
 
+        public object GetCurrentValue()
+        {
+            return getter != null ? getter() : null;
+        }
+
         public ITween SetEasing(EasingFunction value)
         {
             easingFunction = value;

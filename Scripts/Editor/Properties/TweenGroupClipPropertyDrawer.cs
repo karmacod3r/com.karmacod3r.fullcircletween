@@ -1,10 +1,12 @@
+using FullCircleTween.Components;
+using FullCircleTween.Extensions;
 using UnityEditor;
 using UnityEngine;
 
 namespace FullCircleTween.Properties
 {
     [CustomPropertyDrawer(typeof(TweenGroupClip))]
-    public class TweenGroupClipEditor : NoLabelPropertyDrawer
+    public class TweenGroupClipPropertyDrawer : NoLabelPropertyDrawer
     {
     }
 }

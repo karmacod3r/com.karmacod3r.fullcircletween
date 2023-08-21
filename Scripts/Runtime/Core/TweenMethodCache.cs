@@ -17,6 +17,7 @@ namespace FullCircleTween.Core
     {
         public static List<string> allComponentTypeNames = new List<string>();
         private static Dictionary<Type, Dictionary<string, MethodInfo>> tweenMethods = new Dictionary<Type, Dictionary<string, MethodInfo>>();
+        private static Dictionary<Type, Dictionary<string, MethodInfo>> tweenMethodsByPropertyPath = new Dictionary<Type, Dictionary<string, MethodInfo>>();
         private static Dictionary<Type, List<string>> popupListCache = new Dictionary<Type, List<string>>();
 
         private static readonly Dictionary<Type, Type> unityTypeMap = new Dictionary<Type, Type>
@@ -78,6 +79,10 @@ namespace FullCircleTween.Core
                     {
                         tweenMethods[type].TryAdd(entry.Key, entry.Value);
                     }
+                    foreach (var entry in tweenMethodsByPropertyPath[baseType])
+                    {
+                        tweenMethodsByPropertyPath[type].TryAdd(entry.Key, entry.Value);
+                    }
                 }
                 baseType = baseType.BaseType;
             }
@@ -95,6 +100,7 @@ namespace FullCircleTween.Core
                 if (!tweenMethods.ContainsKey(targetType))
                 {
                     tweenMethods.Add(targetType, new Dictionary<string, MethodInfo>());
+                    tweenMethodsByPropertyPath.Add(targetType, new Dictionary<string, MethodInfo>());
                 }
 
                 var methodName = GetMethodName(info);
@@ -105,7 +111,24 @@ namespace FullCircleTween.Core
                 }
 
                 tweenMethods[targetType][methodName] = info;
+
+                var propertyPath = info.GetCustomAttribute<TweenPropertyPathAttribute>()?.propertyPath;
+                if (! string.IsNullOrEmpty(propertyPath))
+                {
+                    tweenMethodsByPropertyPath[targetType][GetFirstLevelPropertyPath(propertyPath)] = info;
+                }
             });
+        }
+
+        public static string GetFirstLevelPropertyPath(string propertyPath)
+        {
+            var dotIndex = propertyPath.IndexOf(".", StringComparison.Ordinal);
+            if (dotIndex > -1)
+            {
+                propertyPath = propertyPath.Substring(0, dotIndex);
+            }
+
+            return propertyPath;
         }
 
         private static string GetFriendlyTypeName(Type type)
@@ -154,6 +177,8 @@ namespace FullCircleTween.Core
             if (!tweenMethods.ContainsKey(targetType))
             {
                 tweenMethods.Add(targetType, new());
+                tweenMethodsByPropertyPath.Add(targetType, new());
+                
                 FillInBaseTypes(targetType);
             }
         }
@@ -169,6 +194,19 @@ namespace FullCircleTween.Core
             ret.Sort();
             popupListCache[targetType] = ret;
             return ret;
+        }
+
+        public static MethodInfo GetTweenMethodInfoForPropertyPath(Type targetType, string propertyPath)
+        {
+            if (targetType == null) return null;
+            EnsureTypeInitialization(targetType);
+            
+            if (tweenMethodsByPropertyPath[targetType].ContainsKey(propertyPath))
+            {
+                return tweenMethodsByPropertyPath[targetType][propertyPath];
+            }
+
+            return null;
         }
 
         public static MethodInfo GetTweenMethodInfo(Type targetType, string methodName)
@@ -187,6 +225,14 @@ namespace FullCircleTween.Core
         public static ITween CreateTween(object target, string methodName, TweenClipValue toValue, float duration)
         {
             var methodInfo = GetTweenMethodInfo(target.GetType(), methodName);
+            var tweenedType = GetMethodTweenedType(methodInfo);
+
+            return CreateTween(target, methodName, toValue.GetValue(tweenedType), duration);
+        }
+
+        public static ITween CreateTween(object target, string methodName, object toValue, float duration)
+        {
+            var methodInfo = GetTweenMethodInfo(target.GetType(), methodName);
             if (methodInfo == null) return null;
 
             var tweenedType = GetMethodTweenedType(methodInfo);
@@ -194,12 +240,12 @@ namespace FullCircleTween.Core
             var parameters = methodInfo.GetParameters();
             if (methodInfo.IsStatic && parameters.Length == 3)
             {
-                return (ITween) methodInfo.Invoke(target, new[] {target, toValue.GetValue(tweenedType), duration});
+                return (ITween) methodInfo.Invoke(target, new[] {target, toValue, duration});
             }
 
             if (!methodInfo.IsStatic && parameters.Length == 2)
             {
-                return (ITween) methodInfo.Invoke(target, new[] {toValue.GetValue(tweenedType), duration});
+                return (ITween) methodInfo.Invoke(target, new[] {toValue, duration});
             }
 
             return null;

@@ -21,6 +21,7 @@ namespace FullCircleTween.TweenCollections
         [Preserve] public static Tween<float> TweenPositionZ(this Transform target, float toValue, float duration)
             => target.To(() => target.position.z, target.SetPositionZ, toValue, duration);
 
+        [TweenPropertyPath("m_LocalPosition")]
         [Preserve] public static Tween<Vector3> TweenLocalPosition(this Transform target, Vector3 toValue, float duration)
             => target.To(() => target.localPosition, value => target.localPosition = value, toValue, duration);
 
@@ -36,6 +37,7 @@ namespace FullCircleTween.TweenCollections
         [Preserve] public static Tween<float> TweenScale(this Transform target, float toValue, float duration)
             => target.To(() => target.localScale.x, target.SetScale, toValue, duration);
 
+        [TweenPropertyPath("m_LocalScale")]
         [Preserve] public static Tween<Vector3> TweenScale(this Transform target, Vector3 toValue, float duration)
             => target.To(() => target.localScale, value => target.localScale = value, toValue, duration);
 
@@ -48,6 +50,7 @@ namespace FullCircleTween.TweenCollections
         [Preserve] public static Tween<float> TweenScaleZ(this Transform target, float toValue, float duration)
             => target.To(() => target.localScale.z, target.SetScaleZ, toValue, duration);
 
+        [TweenPropertyPath("m_LocalRotation")]
         [Preserve] public static Tween<Vector3> TweenLocalRotation(this Transform target, Vector3 toValue, float duration)
             => target.To(() => target.localRotation.eulerAngles, value => target.localRotation = Quaternion.Euler(value), toValue, duration);
 
@@ -60,6 +63,7 @@ namespace FullCircleTween.TweenCollections
         [Preserve] public static Tween<float> TweenLocalRotationZ(this Transform target, float toValue, float duration)
             => target.To(() => target.rotation.eulerAngles.z, target.SetLocalRotationZ, toValue, duration);
 
+        [TweenPropertyPath("m_Rotation")]
         [Preserve] public static Tween<Vector3> TweenRotation(this Transform target, Vector3 toValue, float duration)
             => target.To(() => target.rotation.eulerAngles, value => target.rotation = Quaternion.Euler(value), toValue, duration);
 

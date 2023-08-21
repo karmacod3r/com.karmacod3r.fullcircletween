@@ -86,8 +86,12 @@ namespace FullCircleTween.Components
 
         public TweenState GetState(string stateName)
         {
-            var index = GetStateIndex(stateName);
-            return index > -1 ? tweenStates[index] : null;
+            return GetState(GetStateIndex(stateName));
+        }
+        
+        public TweenState GetState(int index)
+        {
+            return index > -1 && index < tweenStates.Count ? tweenStates[index] : null;
         }
 
         public void Add(string stateName, TweenGroupClip groupClip)

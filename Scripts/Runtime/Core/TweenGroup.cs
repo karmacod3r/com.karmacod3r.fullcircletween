@@ -140,6 +140,11 @@ namespace FullCircleTween.Core
             }
         }
 
+        public object GetCurrentValue()
+        {
+            throw new NotImplementedException();
+        }
+
         public void Skip()
         {
             Seek(delay + Duration);

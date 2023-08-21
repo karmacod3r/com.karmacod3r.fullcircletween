@@ -13,6 +13,7 @@ namespace FullCircleTween.TweenCollections
         [Preserve] public static Tween<float> TweenFade(this TMP_Text target, float toValue, float duration)
             => target.To(() => target.color.a, value => target.color = target.color.SetAlpha(value), toValue, duration);
         
+        [TweenPropertyPath("m_fontColor")]
         [Preserve] public static Tween<Color> TweenColor(this TMP_Text target, Color toValue, float duration)
             => target.To(() => target.color, value => target.color = value, toValue, duration);
         

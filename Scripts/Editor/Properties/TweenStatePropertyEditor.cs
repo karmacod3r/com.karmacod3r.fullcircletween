@@ -1,11 +1,12 @@
 using FullCircleTween.Components;
+using FullCircleTween.Extensions;
 using UnityEditor;
 using UnityEngine;
 
 namespace FullCircleTween.Properties
 {
     [CustomPropertyDrawer(typeof(TweenState))]
-    public class TweenStateEditor : NoLabelPropertyDrawer
+    public class TweenStatePropertyEditor : NoLabelPropertyDrawer
     {
         public override void OnGUI(Rect position, SerializedProperty property, GUIContent label)
         {
@@ -24,6 +25,7 @@ namespace FullCircleTween.Properties
             {
                 EditorGUILayout.PropertyField(stateRegex);
             }
+
             EditorGUILayout.PropertyField(tweenGroup);
             
             EditorGUI.EndProperty();

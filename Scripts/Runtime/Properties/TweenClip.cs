@@ -29,28 +29,20 @@ namespace FullCircleTween.Properties
             return new TweenClip
             {
                 tweenTarget = new TweenTarget(target),
+                tweenMethodName = tweenMethodName,
                 delay = delay,
                 duration = duration,
                 toValue = new TweenClipValue(toValue)
             };
         }
 
-        public static TweenClip Create<T>(Tween<T> tween)
+        public object GetCurrentTweenValue(Component context)
         {
-            if (!(tween.target is Component) || string.IsNullOrEmpty(tween.memberName))
-            {
-                Debug.LogError("Only tweens targeting UnityEngine.Component created by tween collection methods can be added.");
-                return null;
-            }
+            var tween = CreateTween(context);
+            var value = tween?.GetCurrentValue();
+            tween.Kill();
             
-            tween.Pause();
-            return new TweenClip
-            {
-                tweenTarget = new TweenTarget(tween.target as Component),
-                delay = tween.Delay,
-                duration = tween.Duration,
-                toValue = new TweenClipValue(tween.toValue)
-            };
+            return value;
         }
     }
 }

@@ -1,4 +1,4 @@
-using System.IO;
+using FullCircleTween.Components;
 using UnityEditor;
 using UnityEngine;
 
@@ -28,6 +28,12 @@ namespace FullCircleTween.Core
         private static void KillAllTweens()
         {
             TweenManager.KillAll();
+        }
+        
+        [MenuItem("Window/Full Circle Tween/Toggle Record Mode ^#r", false, 2440)]
+        private static void TweenSelectedProperty()
+        {
+            TweenStateMachineEditor.ToggleRecording();
         }
     }
 }

@@ -22,5 +22,6 @@ namespace FullCircleTween.Core.Interfaces
         ITween Then(Action callback);
         void Advance(float deltaSeconds);
         void SetRunner(TweenRunner value);
+        object GetCurrentValue();
     }
 }
