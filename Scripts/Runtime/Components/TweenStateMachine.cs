@@ -55,29 +55,36 @@ namespace FullCircleTween.Components
         {
             var tweenPlayers = root.GetComponents<TweenStateMachine>();
 
+            var stateApplied = false;
             foreach (var tweenPlayer in tweenPlayers)
             {
                 if (tweenPlayer == null || tweenPlayer == this) continue;
 
-                tweenPlayer.ApplyStateFromParent(stateName, tweenGroup);
+                stateApplied = stateApplied || tweenPlayer.ApplyStateFromParent(stateName, tweenGroup);
             }
-            
-            foreach (Transform child in root)
+
+            // Only apply to children, if no other tween players are present or state was applied
+            if (tweenPlayers.Length <= 0 || stateApplied)
             {
-                ApplyChildTweens(child, tweenGroup, stateName);
+                foreach (Transform child in root)
+                {
+                    ApplyChildTweens(child, tweenGroup, stateName);
+                }
             }
         }
 
-        private void ApplyStateFromParent(string value, TweenGroup targetTweenGroup)
+        private bool ApplyStateFromParent(string value, TweenGroup targetTweenGroup)
         {
-            if (!controlledByParent) return;
-            
+            if (!controlledByParent) return false;
+
             var newState = TryGetState(value);
-            if (newState == null) return;
-            
+            if (newState == null) return false;
+
             currentState = value;
             var tween = newState.Play(transform);
             targetTweenGroup.Insert(tween, 0);
+
+            return true;
         }
 
         public int GetStateIndex(string stateName) => tweenStates.FindIndex(state => state.StateNameMatches(stateName));
@@ -88,7 +95,7 @@ namespace FullCircleTween.Components
         {
             return GetState(GetStateIndex(stateName));
         }
-        
+
         public TweenState GetState(int index)
         {
             return index > -1 && index < tweenStates.Count ? tweenStates[index] : null;
