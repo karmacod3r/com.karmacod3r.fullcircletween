@@ -47,7 +47,11 @@ namespace FullCircleTween.Components
 
             KillAll();
             var tweenGroup = newState.Create(this);
-            ApplyChildTweens(transform, tweenGroup, stateName);
+            
+            foreach (Transform child in transform)
+            {
+                ApplyChildTweens(child, tweenGroup, stateName);
+            }
             newState.Play(this, tweenGroup);
         }
 
@@ -64,7 +68,7 @@ namespace FullCircleTween.Components
             }
 
             // Only apply to children, if no other tween players are present or state was applied
-            if (tweenPlayers.Length <= 0 || stateApplied)
+            if (tweenPlayers.Length == 0 || stateApplied)
             {
                 foreach (Transform child in root)
                 {
