@@ -55,7 +55,8 @@ namespace FullCircleTween.Components
         {
             var tweenPlayers = root.GetComponents<TweenStateMachine>();
 
-            string appliedState = null;
+            string appliedState = (tweenPlayers.Length == 0) ? stateName : null;
+            
             foreach (var tweenPlayer in tweenPlayers)
             {
                 if (tweenPlayer == null || tweenPlayer == this) continue;
@@ -66,9 +67,9 @@ namespace FullCircleTween.Components
                     appliedState = newState.stateName;
                 }
             }
-
+            
             // Only apply to children, if no other tween players are present or state was applied
-            if (tweenPlayers.Length == 0 || appliedState != null)
+            if (appliedState != null)
             {
                 foreach (Transform child in root)
                 {
