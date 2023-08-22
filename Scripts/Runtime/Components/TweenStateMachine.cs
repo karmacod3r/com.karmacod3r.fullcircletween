@@ -128,7 +128,7 @@ namespace FullCircleTween.Components
             var index = GetStateIndex(stateName);
             if (index == -1) return;
 
-            tweenStates[index].tweenGroup.Pause();
+            tweenStates[index].tweenGroup?.Pause();
             tweenStates.RemoveAt(index);
         }
 

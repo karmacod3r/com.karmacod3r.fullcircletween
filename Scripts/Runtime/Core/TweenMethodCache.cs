@@ -100,6 +100,10 @@ namespace FullCircleTween.Core
                 if (!tweenMethods.ContainsKey(targetType))
                 {
                     tweenMethods.Add(targetType, new Dictionary<string, MethodInfo>());
+                }
+
+                if (!tweenMethodsByPropertyPath.ContainsKey(targetType))
+                {
                     tweenMethodsByPropertyPath.Add(targetType, new Dictionary<string, MethodInfo>());
                 }
 
