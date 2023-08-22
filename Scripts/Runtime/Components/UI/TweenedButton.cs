@@ -73,6 +73,11 @@ namespace FullCircleTween.Components.UI
 
         public void OnPointerClick(PointerEventData eventData)
         {
+            Click();
+        }
+
+        public void Click()
+        {
             onClick?.Invoke();
         }
     }
