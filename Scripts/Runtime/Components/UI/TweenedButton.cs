@@ -22,6 +22,8 @@ namespace FullCircleTween.Components.UI
                 if (stateMachine == null)
                 {
                     stateMachine = gameObject.AddComponent<TweenStateMachine>();
+                    stateMachine.controlledByParent = false;
+                    
                     stateMachine.Remove("Visible");
                     stateMachine.Remove("Hidden");
                     

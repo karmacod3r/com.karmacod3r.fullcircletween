@@ -61,10 +61,10 @@ namespace FullCircleTween.Components
             {
                 if (tweenPlayer == null || tweenPlayer == this) continue;
 
-                var newState = tweenPlayer.ApplyStateFromParent(stateName, tweenGroup);
-                if (newState != null && appliedState == null)
+                var newStateName = tweenPlayer.ApplyStateFromParent(stateName, tweenGroup);
+                if (newStateName != null && appliedState == null)
                 {
-                    appliedState = newState.stateName;
+                    appliedState = newStateName;
                 }
             }
             
@@ -78,18 +78,19 @@ namespace FullCircleTween.Components
             }
         }
 
-        private TweenState ApplyStateFromParent(string value, TweenGroup targetTweenGroup)
+        private string ApplyStateFromParent(string value, TweenGroup targetTweenGroup)
         {
-            if (!controlledByParent) return null;
-
             var newState = TryGetState(value);
-            if (newState == null) return null;
+            if (newState == null) return value;
+            
+            // block propagation if we have a match, but not controlled by parent
+            if (!controlledByParent) return null;
 
             currentState = value;
             var tween = newState.tweenGroup.Play(transform);
             targetTweenGroup.Insert(tween, 0);
 
-            return newState;
+            return newState.stateName;
         }
 
         public int GetStateIndex(string stateName) => tweenStates.FindIndex(state => state.StateNameMatches(stateName));
