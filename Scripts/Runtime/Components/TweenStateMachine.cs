@@ -90,7 +90,7 @@ namespace FullCircleTween.Components
             var tween = newState.tweenGroup.Play(transform);
             targetTweenGroup.Insert(tween, 0);
 
-            return newState.stateName;
+            return value;//newState.stateName;
         }
 
         public int GetStateIndex(string stateName) => tweenStates.FindIndex(state => state.StateNameMatches(stateName));
