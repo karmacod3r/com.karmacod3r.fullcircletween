@@ -178,10 +178,12 @@ namespace FullCircleTween.Core
 
         private static void EnsureTypeInitialization(Type targetType)
         {
+            if (!tweenMethodsByPropertyPath.ContainsKey(targetType)) {
+                tweenMethodsByPropertyPath.Add(targetType, new());
+            }
             if (!tweenMethods.ContainsKey(targetType))
             {
                 tweenMethods.Add(targetType, new());
-                tweenMethodsByPropertyPath.Add(targetType, new());
                 
                 FillInBaseTypes(targetType);
             }
